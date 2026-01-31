@@ -1093,9 +1093,9 @@ class MainActivity : BaseActivity() {
                     showSystemApps = newShowSystem
                     sharedPreferences.edit().putBoolean(KEY_SHOW_SYSTEM_APPS, showSystemApps).apply()
                     updateCategoryChips()
-                }
-
-                if (sortChanged || showSystemChanged) {
+                    // Always refresh the list when show system apps changes, with animation only if sort didn't change
+                    sortAndFilterApps(preserveScrollPosition = false, scrollToTop = true, animate = false)
+                } else if (sortChanged) {
                     sortAndFilterApps(preserveScrollPosition = false, scrollToTop = true, animate = true)
                 }
             }
@@ -1447,9 +1447,6 @@ class MainActivity : BaseActivity() {
 
                     // skip apps that are disabled (treated as "offline" — don't show them even if system apps are enabled)
                     if (!appInfo.enabled) continue
-
-                    // include if user requested system apps, or it's a user-installed app
-                    if (!showSystemApps && isSystemApp) continue
 
                     val packageName = packageInfo.packageName
 
@@ -1873,7 +1870,6 @@ class MainActivity : BaseActivity() {
                     val ai = pi.applicationInfo ?: return@withContext null
                     if (!ai.enabled) return@withContext null
                     val isSystemApp = (ai.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-                    if (!showSystemApps && isSystemApp) return@withContext null
                     val hasInternet = pm.checkPermission(Manifest.permission.INTERNET, pkg) == PackageManager.PERMISSION_GRANTED
                     if (!hasInternet) return@withContext null
                     val appName = pm.getApplicationLabel(ai).toString()
