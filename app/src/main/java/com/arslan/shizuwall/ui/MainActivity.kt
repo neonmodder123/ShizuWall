@@ -1097,6 +1097,21 @@ class MainActivity : BaseActivity() {
                 if (showSystemChanged) {
                     showSystemApps = newShowSystem
                     sharedPreferences.edit().putBoolean(KEY_SHOW_SYSTEM_APPS, showSystemApps).apply()
+                    
+                    // When hiding system apps, deselect all system apps to prevent them from being firewalled
+                    if (!showSystemApps) {
+                        val systemAppsToDeselect = appList.filter { it.isSystem && it.isSelected }
+                        for (i in appList.indices) {
+                            if (appList[i].isSystem && appList[i].isSelected) {
+                                appList[i] = appList[i].copy(isSelected = false)
+                            }
+                        }
+                        if (systemAppsToDeselect.isNotEmpty()) {
+                            saveSelectedApps()
+                            updateSelectedCount()
+                        }
+                    }
+                    
                     updateCategoryChips()
                     // Always refresh the list when show system apps changes, with animation only if sort didn't change
                     sortAndFilterApps(preserveScrollPosition = false, scrollToTop = true, animate = false)
