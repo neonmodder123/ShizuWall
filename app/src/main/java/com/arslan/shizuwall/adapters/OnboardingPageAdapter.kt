@@ -52,7 +52,13 @@ class OnboardingPageAdapter(
             if (page.secondaryButtonText != null && page.onSecondaryButtonClick != null) {
                 secondaryButton.visibility = View.VISIBLE
                 secondaryButton.text = page.secondaryButtonText
-                secondaryButton.setOnClickListener { page.onSecondaryButtonClick.invoke() }
+                secondaryButton.isEnabled = page.isSecondaryButtonEnabled
+                secondaryButton.alpha = if (page.isSecondaryButtonEnabled) 1.0f else 0.5f
+                secondaryButton.setOnClickListener { 
+                    if (page.isSecondaryButtonEnabled) {
+                        page.onSecondaryButtonClick.invoke()
+                    }
+                }
             } else {
                 secondaryButton.visibility = View.GONE
             }
