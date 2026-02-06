@@ -12,6 +12,7 @@ import com.arslan.shizuwall.shell.ShellExecutorProvider
 import com.arslan.shizuwall.ui.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
@@ -27,10 +28,34 @@ import rikka.shizuku.Shizuku
  */
 class FirewallControlReceiver : BroadcastReceiver() {
 
+    companion object {
+        private const val TAG = "FirewallControl"
+        private const val SHIZUKU_WAIT_MAX_ATTEMPTS = 10
+        private const val SHIZUKU_WAIT_DELAY_MS = 300L
+    }
+
+    private suspend fun waitForShizukuBinder(): Boolean {
+        for (attempt in 1..SHIZUKU_WAIT_MAX_ATTEMPTS) {
+            try {
+                if (Shizuku.pingBinder()) {
+                    android.util.Log.d(TAG, "Shizuku binder available after $attempt attempt(s)")
+                    return true
+                }
+            } catch (_: Throwable) {
+                // Shizuku not ready yet
+            }
+            if (attempt < SHIZUKU_WAIT_MAX_ATTEMPTS) {
+                delay(SHIZUKU_WAIT_DELAY_MS)
+            }
+        }
+        android.util.Log.w(TAG, "Shizuku binder not available after $SHIZUKU_WAIT_MAX_ATTEMPTS attempts")
+        return false
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         
         // Log received action to help debug ADB commands
-        android.util.Log.d("FirewallControl", "Received action: ${intent.action}")
+        android.util.Log.d(TAG, "Received action: ${intent.action}")
         
         if (intent.action != MainActivity.ACTION_FIREWALL_CONTROL) return
 
@@ -39,30 +64,33 @@ class FirewallControlReceiver : BroadcastReceiver() {
         val enabled = intent.getBooleanExtra(MainActivity.EXTRA_FIREWALL_ENABLED, false)
         val csv = intent.getStringExtra(MainActivity.EXTRA_PACKAGES_CSV)
 
-        // Resolve package list: CSV -> saved selected apps
-        val rawPackages = if (!csv.isNullOrBlank()) {
-            csv.split(",").map { it.trim() }.filter { it.isNotEmpty() }
-        } else {
-            val prefs = context.getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE)
-            prefs.getStringSet(MainActivity.KEY_SELECTED_APPS, emptySet())?.toList() ?: emptyList()
-        }
-
-        // filter out any Shizuku packages and this app itself from incoming list
-        val packages = rawPackages.filterNot { it == "moe.shizuku.privileged.api" || it == context.packageName }
-
-        val prefs = context.getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE)
-        val adaptiveMode = prefs.getBoolean(MainActivity.KEY_ADAPTIVE_MODE, false)
-
-        if (enabled && packages.isEmpty() && !adaptiveMode) {
-            Toast.makeText(context, context.getString(R.string.no_apps_selected), Toast.LENGTH_SHORT).show()
-            pending.finish()
-            return
-        }
-
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val prefsLocal = context.getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE)
-                val mode = prefsLocal.getString(MainActivity.KEY_WORKING_MODE, "SHIZUKU") ?: "SHIZUKU"
+                // Read SharedPreferences inside IO coroutine to ensure proper initialization
+                // when app process is started by this broadcast
+                val prefs = context.getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE)
+                val mode = prefs.getString(MainActivity.KEY_WORKING_MODE, "SHIZUKU") ?: "SHIZUKU"
+                val adaptiveMode = prefs.getBoolean(MainActivity.KEY_ADAPTIVE_MODE, false)
+
+                // Resolve package list: CSV -> saved selected apps
+                val rawPackages = if (!csv.isNullOrBlank()) {
+                    csv.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                } else {
+                    prefs.getStringSet(MainActivity.KEY_SELECTED_APPS, emptySet())?.toList() ?: emptyList()
+                }
+
+                // filter out any Shizuku packages and this app itself from incoming list
+                val packages = rawPackages.filterNot { it == "moe.shizuku.privileged.api" || it == context.packageName }
+
+                android.util.Log.d(TAG, "Packages to process: $packages, enabled: $enabled, adaptiveMode: $adaptiveMode")
+
+                if (enabled && packages.isEmpty() && !adaptiveMode) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, context.getString(R.string.no_apps_selected), Toast.LENGTH_SHORT).show()
+                    }
+                    pending.finish()
+                    return@launch
+                }
 
                 val backendReady = if (mode == "LADB") {
                     val daemonManager = com.arslan.shizuwall.daemon.PersistentDaemonManager(context)
@@ -72,9 +100,14 @@ class FirewallControlReceiver : BroadcastReceiver() {
                         false
                     }
                 } else {
-                    try {
-                        Shizuku.pingBinder() && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-                    } catch (_: Throwable) {
+                    val binderAvailable = waitForShizukuBinder()
+                    if (binderAvailable) {
+                        try {
+                            Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+                        } catch (_: Throwable) {
+                            false
+                        }
+                    } else {
                         false
                     }
                 }

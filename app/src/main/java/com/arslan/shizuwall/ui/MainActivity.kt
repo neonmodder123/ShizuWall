@@ -43,6 +43,7 @@ import com.arslan.shizuwall.model.AppInfo
 import com.arslan.shizuwall.widgets.FirewallWidgetProvider
 import com.arslan.shizuwall.repo.FirewallStateRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rikka.shizuku.Shizuku
@@ -135,36 +136,63 @@ class MainActivity : BaseActivity() {
         // If already enabled, nothing to do
         if (isFirewallEnabled) return@OnBinderReceivedListener
 
-        val selectedPkgs = loadSelectedApps().toList()
-        if (selectedPkgs.isEmpty() && !adaptiveMode) {
-            // Nothing to enable (and adaptive mode does not allow empty set)
-            return@OnBinderReceivedListener
-        }
-
-        try {
-            if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
-                pendingAutoEnable = true
-                pendingAutoEnableSelectedApps = selectedPkgs
-                Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE)
-                return@OnBinderReceivedListener
+        // Use coroutine to handle auto-enable with proper timing
+        lifecycleScope.launch(Dispatchers.IO) {
+            // Wait a bit for Shizuku binder to fully initialize
+            var binderReady = false
+            for (attempt in 1..10) {
+                try {
+                    if (Shizuku.pingBinder()) {
+                        binderReady = true
+                        break
+                    }
+                } catch (_: Throwable) {}
+                if (attempt < 10) delay(300L)
             }
-        } catch (e: Exception) {
-            checkShizukuPermission()
-            return@OnBinderReceivedListener
-        }
 
-        val skipConfirm = sharedPreferences.getBoolean(KEY_SKIP_ENABLE_CONFIRM, false)
-        if (skipConfirm) {
-            applyFirewallState(true, selectedPkgs)
-            return@OnBinderReceivedListener
-        }
+            if (!binderReady) {
+                withContext(Dispatchers.Main) { checkShizukuPermission() }
+                return@launch
+            }
 
-        val selectedAppsList = appList.filter { selectedPkgs.contains(it.packageName) }
-        if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            runOnUiThread { showFirewallConfirmDialog(if (selectedAppsList.isNotEmpty()) selectedAppsList else emptyList()) }
-        } else {
-            pendingAutoEnable = true
-            pendingAutoEnableSelectedApps = selectedPkgs
+            val selectedPkgs = loadSelectedApps().toList()
+            if (selectedPkgs.isEmpty() && !adaptiveMode) {
+                // Nothing to enable (and adaptive mode does not allow empty set)
+                return@launch
+            }
+
+            val hasPermission = try {
+                Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+            } catch (e: Exception) {
+                false
+            }
+
+            withContext(Dispatchers.Main) {
+                if (!hasPermission) {
+                    pendingAutoEnable = true
+                    pendingAutoEnableSelectedApps = selectedPkgs
+                    try {
+                        Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE)
+                    } catch (_: Exception) {
+                        checkShizukuPermission()
+                    }
+                    return@withContext
+                }
+
+                val skipConfirm = sharedPreferences.getBoolean(KEY_SKIP_ENABLE_CONFIRM, false)
+                if (skipConfirm) {
+                    applyFirewallState(true, selectedPkgs)
+                    return@withContext
+                }
+
+                val selectedAppsList = appList.filter { selectedPkgs.contains(it.packageName) }
+                if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                    showFirewallConfirmDialog(if (selectedAppsList.isNotEmpty()) selectedAppsList else emptyList())
+                } else {
+                    pendingAutoEnable = true
+                    pendingAutoEnableSelectedApps = selectedPkgs
+                }
+            }
         }
     }
 
