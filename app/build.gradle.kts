@@ -105,7 +105,7 @@ android {
             val output = this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
             val appName = "ShizuWall"
             val version = versionName
-            val type = name
+            val type = buildType.name
             output.outputFileName = "$appName-$version-$type.apk"
         }
     }
