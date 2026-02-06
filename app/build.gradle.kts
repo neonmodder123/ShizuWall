@@ -90,16 +90,6 @@ android {
         }
     }
 
-    splits {
-        abi {
-            val isFdroid = gradle.startParameter.taskNames.any { it.contains("fdroid", ignoreCase = true) }
-            isEnable = !isFdroid
-            reset()
-            include("arm64-v8a", "armeabi-v7a")
-            isUniversalApk = true
-        }
-    }
-
     applicationVariants.all {
         outputs.all {
             val output = this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
