@@ -33,6 +33,7 @@ import androidx.appcompat.widget.SwitchCompat
 import com.arslan.shizuwall.R
 import com.arslan.shizuwall.ladb.LadbManager
 import com.arslan.shizuwall.services.AppMonitorService
+import com.arslan.shizuwall.utils.ShizukuPackageResolver
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.json.JSONArray
 import org.json.JSONObject
@@ -621,9 +622,9 @@ class SettingsActivity : BaseActivity() {
         }
     }
 
-    // helper to detect shizuku packages (match exact privileged API package only)
+    // helper to detect shizuku packages (supports both official and forked packages)
     private fun isShizukuPackage(pkg: String): Boolean {
-        return pkg == "moe.shizuku.privileged.api"
+        return ShizukuPackageResolver.isShizukuPackage(this, pkg)
     }
 
     private fun showAdbBroadcastDialog() {

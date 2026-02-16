@@ -81,6 +81,18 @@
             android:name=".receivers.NotificationActionReceiver"
             android:exported="false" />
 
+        <!-- Package change receiver: clears ShizukuPackageResolver cache when packages are added/removed -->
+        <receiver
+            android:name=".receivers.PackageChangeReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".services.AppMonitorService"
             android:enabled="true"

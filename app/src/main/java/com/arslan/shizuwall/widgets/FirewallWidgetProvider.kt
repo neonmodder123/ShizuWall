@@ -13,6 +13,7 @@ import com.arslan.shizuwall.R
 import rikka.shizuku.Shizuku
 import com.arslan.shizuwall.receivers.FirewallControlReceiver
 import com.arslan.shizuwall.ui.MainActivity
+import com.arslan.shizuwall.utils.ShizukuPackageResolver
 
 class FirewallWidgetProvider : AppWidgetProvider() {
 
@@ -38,7 +39,7 @@ class FirewallWidgetProvider : AppWidgetProvider() {
             // Check constraints before enabling
             var selectedApps: List<String> = emptyList()
             if (newState) {
-                selectedApps = loadSelectedApps(sharedPreferences)
+                selectedApps = loadSelectedApps(context, sharedPreferences)
                 val adaptiveMode = sharedPreferences.getBoolean(MainActivity.KEY_ADAPTIVE_MODE, false)
 
                 if (selectedApps.isEmpty() && !adaptiveMode) {
@@ -104,9 +105,9 @@ class FirewallWidgetProvider : AppWidgetProvider() {
             return currentElapsed >= savedElapsed
         }
 
-        private fun loadSelectedApps(sharedPreferences: SharedPreferences): List<String> {
+        private fun loadSelectedApps(context: Context, sharedPreferences: SharedPreferences): List<String> {
             return sharedPreferences.getStringSet(MainActivity.KEY_SELECTED_APPS, emptySet())
-                ?.filterNot { it == "moe.shizuku.privileged.api" }
+                ?.filterNot { ShizukuPackageResolver.isShizukuPackage(context, it) }
                 ?.toList() ?: emptyList()
         }
 

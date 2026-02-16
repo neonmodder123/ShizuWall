@@ -12,6 +12,7 @@ import com.arslan.shizuwall.shell.ShellExecutorBlocking
 import com.arslan.shizuwall.ui.MainActivity
 import kotlinx.coroutines.*
 import com.arslan.shizuwall.widgets.FirewallWidgetProvider
+import com.arslan.shizuwall.utils.ShizukuPackageResolver
 import rikka.shizuku.Shizuku
 
 class FirewallTileService : TileService() {
@@ -112,7 +113,7 @@ class FirewallTileService : TileService() {
     private fun loadSelectedApps(): List<String> {
         val selfPkg = packageName
         return sharedPreferences.getStringSet(MainActivity.KEY_SELECTED_APPS, emptySet())
-            ?.filterNot { it == "moe.shizuku.privileged.api" || it == selfPkg }
+            ?.filterNot { ShizukuPackageResolver.isShizukuPackage(this, it) || it == selfPkg }
             ?.toList() ?: emptyList()
     }
 
@@ -179,7 +180,7 @@ class FirewallTileService : TileService() {
         val selfPkg = packageName
         for (pkg in packageNames) {
             // never target the app itself or Shizuku
-            if (pkg == selfPkg || pkg == "moe.shizuku.privileged.api") continue
+            if (pkg == selfPkg || ShizukuPackageResolver.isShizukuPackage(this, pkg)) continue
             if (ShellExecutorBlocking.runBlockingSuccess(this, "cmd connectivity set-package-networking-enabled false $pkg")) {
                 successful.add(pkg)
             }
@@ -192,7 +193,7 @@ class FirewallTileService : TileService() {
         val selfPkg = packageName
         for (pkg in packageNames) {
             // never target the app itself or Shizuku
-            if (pkg == selfPkg || pkg == "moe.shizuku.privileged.api") continue
+            if (pkg == selfPkg || ShizukuPackageResolver.isShizukuPackage(this, pkg)) continue
             if (!ShellExecutorBlocking.runBlockingSuccess(this, "cmd connectivity set-package-networking-enabled true $pkg")) {
                 allSuccessful = false
             }

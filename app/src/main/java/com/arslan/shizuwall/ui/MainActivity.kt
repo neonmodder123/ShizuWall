@@ -55,6 +55,7 @@ import kotlin.comparisons.*
 import com.arslan.shizuwall.adapters.ErrorEntry
 import com.arslan.shizuwall.shizuku.ShizukuSetupActivity
 import com.arslan.shizuwall.shell.ShellExecutorProvider
+import com.arslan.shizuwall.utils.ShizukuPackageResolver
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.radiobutton.MaterialRadioButton
 import org.json.JSONArray
@@ -695,12 +696,12 @@ class MainActivity : BaseActivity() {
                 val d = MaterialAlertDialogBuilder(this)
                      .setTitle(getString(R.string.shizuku_not_running_title))
                      .setMessage(getString(R.string.shizuku_not_running_message))
-                     .setPositiveButton(getString(R.string.open_shizuku)) { _, _ ->
-                        // Try to open the Shizuku app if present, otherwise open Play Store, otherwise fallback to GitHub.
-                        val pm = packageManager
-                        val candidates = listOf("moe.shizuku.privileged.api", "moe.shizuku.manager")
-                        var launched = false
-                        for (pkg in candidates) {
+                      .setPositiveButton(getString(R.string.open_shizuku)) { _, _ ->
+                         // Try to open the Shizuku app if present, otherwise open Play Store, otherwise fallback to GitHub.
+                         val pm = packageManager
+                         val candidates = ShizukuPackageResolver.getLaunchCandidates(this@MainActivity)
+                         var launched = false
+                         for (pkg in candidates) {
                             val launch = pm.getLaunchIntentForPackage(pkg)
                             if (launch != null) {
                                 startActivity(launch)
@@ -1555,7 +1556,7 @@ class MainActivity : BaseActivity() {
                             val packageName = packageInfo.packageName
 
                             // never show Shizuku app(s) or this app itself
-                            if (packageName == "moe.shizuku.privileged.api") continue
+                            if (ShizukuPackageResolver.isShizukuPackage(this@MainActivity, packageName)) continue
                             if (packageName == selfPkg) continue
 
                             // Check INTERNET permission from pre-fetched permissions array
@@ -1681,7 +1682,7 @@ class MainActivity : BaseActivity() {
 
     private fun saveSelectedApps() {
         val selectedPackages = appList
-            .filter { it.isSelected && it.packageName != "moe.shizuku.privileged.api" }
+            .filter { it.isSelected && !ShizukuPackageResolver.isShizukuPackage(this, it.packageName) }
             .map { it.packageName }
             .toSet()
         sharedPreferences.edit()
@@ -1901,7 +1902,7 @@ class MainActivity : BaseActivity() {
         val pm = packageManager
         for (pkg in packageNames) {
             // Treat Shizuku packages as "missing" / never-operable
-            if (pkg == "moe.shizuku.privileged.api") {
+            if (ShizukuPackageResolver.isShizukuPackage(this, pkg)) {
                 missing.add(pkg)
                 continue
             }
@@ -2052,7 +2053,7 @@ class MainActivity : BaseActivity() {
             }
             maybeApp?.let { appInfo ->
                 // skip Shizuku packages entirely
-                if (appInfo.packageName == "moe.shizuku.privileged.api") return@let
+                if (ShizukuPackageResolver.isShizukuPackage(this@MainActivity, appInfo.packageName)) return@let
 
                 // Avoid duplicates (in case it was already present)
                 if (appList.any { it.packageName == appInfo.packageName }) return@let

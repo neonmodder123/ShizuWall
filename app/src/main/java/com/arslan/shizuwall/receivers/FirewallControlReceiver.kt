@@ -10,6 +10,7 @@ import android.widget.Toast
 import com.arslan.shizuwall.R
 import com.arslan.shizuwall.shell.ShellExecutorProvider
 import com.arslan.shizuwall.ui.MainActivity
+import com.arslan.shizuwall.utils.ShizukuPackageResolver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -80,7 +81,7 @@ class FirewallControlReceiver : BroadcastReceiver() {
                 }
 
                 // filter out any Shizuku packages and this app itself from incoming list
-                val packages = rawPackages.filterNot { it == "moe.shizuku.privileged.api" || it == context.packageName }
+                val packages = rawPackages.filterNot { ShizukuPackageResolver.isShizukuPackage(context, it) || it == context.packageName }
 
                 android.util.Log.d(TAG, "Packages to process: $packages, enabled: $enabled, adaptiveMode: $adaptiveMode")
 
