@@ -24,6 +24,7 @@ import android.widget.ImageView
 import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.ViewCompat
@@ -495,6 +496,25 @@ class MainActivity : BaseActivity() {
         if (::firewallToggle.isInitialized) {
             firewallToggle.isEnabled = isFirewallEnabled || savedCount > 0
         }
+
+        // "Press back again to exit" confirmation dialog
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            private var backPressedOnce = false
+
+            override fun handleOnBackPressed() {
+                if (backPressedOnce) {
+                    // Second press within the window – exit the app
+                    finish()
+                    return
+                }
+
+                backPressedOnce = true
+                Toast.makeText(this@MainActivity, getString(R.string.exit_confirm_message), Toast.LENGTH_SHORT).show()
+
+                // Reset the flag after 2 seconds
+                recyclerView.postDelayed({ backPressedOnce = false }, 2000)
+            }
+        })
 
     }
 
