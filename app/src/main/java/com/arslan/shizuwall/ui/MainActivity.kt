@@ -11,10 +11,12 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.content.ActivityNotFoundException
 import androidx.activity.result.contract.ActivityResultContracts
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
@@ -563,6 +565,21 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.action == MotionEvent.ACTION_DOWN) {
+            if (::searchView.isInitialized && searchView.hasFocus()) {
+                val rect = Rect()
+                searchView.getGlobalVisibleRect(rect)
+                if (!rect.contains(ev.rawX.toInt(), ev.rawY.toInt())) {
+                    searchView.clearFocus()
+                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+                    imm.hideSoftInputFromWindow(searchView.windowToken, 0)
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         if (shizukuListenersAdded) {
@@ -823,19 +840,7 @@ class MainActivity : BaseActivity() {
             }
         })
 
-        // Clear SearchView focus (and hide keyboard) when user taps outside the search field.
-        // Attach to the root view so taps anywhere will clear the cursor.
-        val root = findViewById<View>(R.id.main)
-        root.setOnTouchListener { _, _ ->
-            if (::searchView.isInitialized && searchView.hasFocus()) {
-                searchView.clearFocus()
-                try {
-                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-                    imm.hideSoftInputFromWindow(searchView.windowToken, 0)
-                } catch (_: Exception) { }
-            }
-            false
-        }
+
     }
 
     private fun setupSelectAllCheckbox() {
@@ -1068,17 +1073,7 @@ class MainActivity : BaseActivity() {
         recyclerView.adapter = appListAdapter
         defaultItemAnimator = recyclerView.itemAnimator
 
-        // Clear SearchView focus when the user touches the list (dismiss cursor + keyboard)
-        recyclerView.setOnTouchListener { _, _ ->
-            if (::searchView.isInitialized && searchView.hasFocus()) {
-                searchView.clearFocus()
-                try {
-                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-                    imm.hideSoftInputFromWindow(searchView.windowToken, 0)
-                } catch (_: Exception) { }
-            }
-            false
-        }
+
     }
 
     private fun toggleFavorite(appInfo: AppInfo) {
