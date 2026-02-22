@@ -75,13 +75,21 @@ class FirewallTileService : TileService() {
             val selectedApps = loadSelectedApps()
             val firewallMode = FirewallMode.fromName(sharedPreferences.getString(MainActivity.KEY_FIREWALL_MODE, FirewallMode.DEFAULT.name))
             
-            if (selectedApps.isEmpty() && !firewallMode.allowsDynamicSelection()) {
+            val targetApps = if (firewallMode == FirewallMode.WHITELIST) {
+                // In whitelist mode, get all apps minus selected ones
+                val showSystemApps = sharedPreferences.getBoolean(MainActivity.KEY_SHOW_SYSTEM_APPS, false)
+                com.arslan.shizuwall.utils.WhitelistFilter.getPackagesToBlock(this, selectedApps, showSystemApps)
+            } else {
+                selectedApps
+            }
+
+            if (targetApps.isEmpty() && !firewallMode.allowsDynamicSelection()) {
                 Toast.makeText(this@FirewallTileService, getString(R.string.no_apps_selected), Toast.LENGTH_SHORT).show()
                 return
             }
             if (!checkBackendReady()) return
             scope.launch {
-                applyEnableFirewall(selectedApps)
+                applyEnableFirewall(targetApps)
             }
         }
     }
@@ -228,4 +236,5 @@ class FirewallTileService : TileService() {
     private fun loadActivePackages(): Set<String> {
         return sharedPreferences.getStringSet(MainActivity.KEY_ACTIVE_PACKAGES, emptySet()) ?: emptySet()
     }
+
 }

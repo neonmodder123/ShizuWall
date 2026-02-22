@@ -78,7 +78,13 @@ class FirewallControlReceiver : BroadcastReceiver() {
                 val rawPackages = if (!csv.isNullOrBlank()) {
                     csv.split(",").map { it.trim() }.filter { it.isNotEmpty() }
                 } else {
-                    prefs.getStringSet(MainActivity.KEY_SELECTED_APPS, emptySet())?.toList() ?: emptyList()
+                    val saved = prefs.getStringSet(MainActivity.KEY_SELECTED_APPS, emptySet())?.toList() ?: emptyList()
+                    if (firewallMode == FirewallMode.WHITELIST) {
+                        val showSys = prefs.getBoolean(MainActivity.KEY_SHOW_SYSTEM_APPS, false)
+                        com.arslan.shizuwall.utils.WhitelistFilter.getPackagesToBlock(context, saved, showSys)
+                    } else {
+                        saved
+                    }
                 }
 
                 // filter out any Shizuku packages and this app itself from incoming list
