@@ -271,6 +271,7 @@
     <string name="firewall_mode_smart_foreground">Smart Foreground (Beta)</string>
     <string name="firewall_mode_smart_foreground_description">Only allow the app currently in foreground</string>
     <string name="smart_foreground_requires_accessibility">Requires Accessibility permission</string>
+    <string name="firewall_mode_change_disabled">Cannot change firewall mode while firewall is enabled. Please disable the firewall first.</string>
     <string name="smart_foreground_service_description">Monitors foreground app to manage firewall rules</string>
     <string name="smart_foreground_notification_channel_name">Smart Foreground (Service)</string>
     <string name="smart_foreground_notification_channel_description">Background service for monitoring foreground app</string>

@@ -80,6 +80,7 @@ class SettingsActivity : BaseActivity() {
     private lateinit var radioModeSmartForeground: RadioButton
     private lateinit var radioModeWhitelist: RadioButton
     private lateinit var tvSmartForegroundWarning: TextView
+    private lateinit var tvFirewallModeDisabledWarning: TextView
 
     private val createDocumentLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
@@ -140,6 +141,9 @@ class SettingsActivity : BaseActivity() {
         val mode = FirewallMode.fromName(sharedPreferences.getString(MainActivity.KEY_FIREWALL_MODE, FirewallMode.DEFAULT.name))
         if (::tvSmartForegroundWarning.isInitialized) {
             updateFirewallModeUI(mode)
+            // Also update firewall mode selector state based on firewall enabled status
+            val isFirewallEnabled = sharedPreferences.getBoolean(MainActivity.KEY_FIREWALL_ENABLED, false)
+            updateFirewallModeSelectorState(isFirewallEnabled)
         }
     }
 
@@ -181,6 +185,7 @@ class SettingsActivity : BaseActivity() {
         radioModeSmartForeground = findViewById(R.id.radioModeSmartForeground)
         radioModeWhitelist = findViewById(R.id.radioModeWhitelist)
         tvSmartForegroundWarning = findViewById(R.id.tvSmartForegroundWarning)
+        tvFirewallModeDisabledWarning = findViewById(R.id.tvFirewallModeDisabledWarning)
     }
 
     private fun loadSettings() {
@@ -208,6 +213,10 @@ class SettingsActivity : BaseActivity() {
         
         // Update UI based on mode
         updateFirewallModeUI(firewallMode)
+        
+        // Update firewall mode selector state based on whether firewall is enabled
+        val isFirewallEnabled = prefs.getBoolean(MainActivity.KEY_FIREWALL_ENABLED, false)
+        updateFirewallModeSelectorState(isFirewallEnabled)
 
         val currentFont = prefs.getString(MainActivity.KEY_SELECTED_FONT, "default") ?: "default"
         tvCurrentFont.text = if (currentFont == "ndot") getString(R.string.font_ndot) else getString(R.string.font_default)
@@ -281,6 +290,25 @@ class SettingsActivity : BaseActivity() {
         }
     }
 
+    /**
+     * Update firewall mode selector state based on whether firewall is enabled.
+     * When firewall is enabled, disable mode changes and show warning.
+     */
+    private fun updateFirewallModeSelectorState(isFirewallEnabled: Boolean) {
+        radioGroupFirewallMode.isEnabled = !isFirewallEnabled
+        radioModeDefault.isEnabled = !isFirewallEnabled
+        radioModeAdaptive.isEnabled = !isFirewallEnabled
+        radioModeSmartForeground.isEnabled = !isFirewallEnabled
+        radioModeWhitelist.isEnabled = !isFirewallEnabled
+        
+        // Update alpha for visual feedback
+        val targetAlpha = if (isFirewallEnabled) 0.5f else 1f
+        radioGroupFirewallMode.alpha = targetAlpha
+        
+        // Show/hide warning message
+        tvFirewallModeDisabledWarning.visibility = if (isFirewallEnabled) View.VISIBLE else View.GONE
+    }
+
     private fun setupListeners() {
         val prefs = getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE)
 
@@ -291,6 +319,23 @@ class SettingsActivity : BaseActivity() {
 
         // Firewall Mode Selector Listener
         radioGroupFirewallMode.setOnCheckedChangeListener { _, checkedId ->
+            // Check if firewall is enabled - if so, prevent mode change
+            val isFirewallEnabled = sharedPreferences.getBoolean(MainActivity.KEY_FIREWALL_ENABLED, false)
+            if (isFirewallEnabled) {
+                // Show toast message and revert selection
+                Toast.makeText(this, R.string.firewall_mode_change_disabled, Toast.LENGTH_LONG).show()
+                
+                // Revert to current mode
+                val currentMode = FirewallMode.fromName(sharedPreferences.getString(MainActivity.KEY_FIREWALL_MODE, FirewallMode.DEFAULT.name))
+                when (currentMode) {
+                    FirewallMode.ADAPTIVE -> radioGroupFirewallMode.check(R.id.radioModeAdaptive)
+                    FirewallMode.SMART_FOREGROUND -> radioGroupFirewallMode.check(R.id.radioModeSmartForeground)
+                    FirewallMode.WHITELIST -> radioGroupFirewallMode.check(R.id.radioModeWhitelist)
+                    else -> radioGroupFirewallMode.check(R.id.radioModeDefault)
+                }
+                return@setOnCheckedChangeListener
+            }
+            
             val newMode = when (checkedId) {
                 R.id.radioModeAdaptive -> FirewallMode.ADAPTIVE
                 R.id.radioModeSmartForeground -> FirewallMode.SMART_FOREGROUND
