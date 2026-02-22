@@ -18,3 +18,4 @@ app/release/
 daemon.bin
 app/fdroid/release/
 app/full/release/
+.vscode/
