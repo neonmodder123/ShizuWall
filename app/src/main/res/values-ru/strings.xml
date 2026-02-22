@@ -132,6 +132,8 @@
     <string name="app_installed_notification_channel_description">Уведомления при установке нового приложения</string>
     <string name="appearance_section">Внешний вид</string>
     <string name="font">Шрифт</string>
+    <string name="language">Язык</string>
+    <string name="language_system_default">Системный по умолчанию</string>
     <string name="advanced_section">Расширенные настройки</string>
     <string name="adb_broadcast_usage_description">Краткое руководство по использованию adb для управления брандмауэром</string>
     <string name="data_management_section">Управление данными</string>

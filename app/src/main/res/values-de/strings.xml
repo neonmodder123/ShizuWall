@@ -131,6 +131,8 @@
     <string name="auto_enable_on_shizuku_start_description">Firewall automatisch aktivieren, wenn der Shizuku-Dienst verfügbar wird</string>
     <string name="appearance_section">Erscheinungsbild</string>
     <string name="font">Schriftart</string>
+    <string name="language">Sprache</string>
+    <string name="language_system_default">Systemstandard</string>
     <string name="advanced_section">Erweitert</string>
     <string name="adb_broadcast_usage_description">Schnellübersicht zur Verwendung von adb zur Firewall-Steuerung</string>
     <string name="data_management_section">Datenverwaltung</string>

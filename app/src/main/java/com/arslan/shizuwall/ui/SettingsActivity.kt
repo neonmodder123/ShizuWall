@@ -53,6 +53,8 @@ class SettingsActivity : BaseActivity() {
     private lateinit var switchKeepErrorAppsSelected: SwitchCompat
     private lateinit var layoutChangeFont: LinearLayout
     private lateinit var tvCurrentFont: TextView
+    private lateinit var layoutChangeLanguage: LinearLayout
+    private lateinit var tvCurrentLanguage: TextView
     private lateinit var btnExport: LinearLayout
     private lateinit var btnImport: LinearLayout
     private lateinit var btnDonate: LinearLayout
@@ -157,6 +159,8 @@ class SettingsActivity : BaseActivity() {
         switchKeepErrorAppsSelected = findViewById(R.id.switchKeepErrorAppsSelected)
         layoutChangeFont = findViewById(R.id.layoutChangeFont)
         tvCurrentFont = findViewById(R.id.tvCurrentFont)
+        layoutChangeLanguage = findViewById(R.id.layoutChangeLanguage)
+        tvCurrentLanguage = findViewById(R.id.tvCurrentLanguage)
         btnExport = findViewById(R.id.btnExport)
         btnImport = findViewById(R.id.btnImport)
         btnDonate = findViewById(R.id.btnDonate)
@@ -220,6 +224,7 @@ class SettingsActivity : BaseActivity() {
 
         val currentFont = prefs.getString(MainActivity.KEY_SELECTED_FONT, "default") ?: "default"
         tvCurrentFont.text = if (currentFont == "ndot") getString(R.string.font_ndot) else getString(R.string.font_default)
+        updateCurrentLanguageDisplay()
         switchUseDynamicColor.isChecked = prefs.getBoolean(MainActivity.KEY_USE_DYNAMIC_COLOR, true)
         switchAutoEnableOnShizukuStart.isChecked = prefs.getBoolean(MainActivity.KEY_AUTO_ENABLE_ON_SHIZUKU_START, false)
         switchAppMonitor.isChecked = prefs.getBoolean(MainActivity.KEY_APP_MONITOR_ENABLED, false)
@@ -399,6 +404,10 @@ class SettingsActivity : BaseActivity() {
             showFontSelectorDialog()
         }
 
+        layoutChangeLanguage.setOnClickListener {
+            showLanguageSelectorDialog()
+        }
+
         btnExport.setOnClickListener {
             createDocumentLauncher.launch("shizuwall_settings")
         }
@@ -560,6 +569,67 @@ class SettingsActivity : BaseActivity() {
                     sharedPreferences.edit().putBoolean("show_whitelist_prompt", false).apply()
                 }
             }
+            .show()
+    }
+
+    private val supportedLocales = linkedMapOf(
+        "" to "System default",
+        "en" to "English",
+        "de" to "Deutsch",
+        "es" to "Espa\u00f1ol",
+        "ja" to "\u65e5\u672c\u8a9e",
+        "pt" to "Portugu\u00eas",
+        "ru" to "\u0420\u0443\u0441\u0441\u043a\u0438\u0439",
+        "tr" to "T\u00fcrk\u00e7e",
+        "zh" to "\u4e2d\u6587"
+    )
+
+    private fun updateCurrentLanguageDisplay() {
+        val currentLocales = androidx.appcompat.app.AppCompatDelegate.getApplicationLocales()
+        if (currentLocales.isEmpty) {
+            tvCurrentLanguage.text = getString(R.string.language_system_default)
+        } else {
+            val tag = currentLocales.get(0)?.toLanguageTag() ?: ""
+            tvCurrentLanguage.text = supportedLocales[tag] ?: getString(R.string.language_system_default)
+        }
+    }
+
+    private fun showLanguageSelectorDialog() {
+        val localeKeys = supportedLocales.keys.toList()
+        val localeNames = supportedLocales.values.toTypedArray()
+        // Replace first entry with the dynamic string
+        localeNames[0] = getString(R.string.language_system_default)
+
+        val currentLocales = androidx.appcompat.app.AppCompatDelegate.getApplicationLocales()
+        val currentTag = if (currentLocales.isEmpty) "" else (currentLocales.get(0)?.toLanguageTag() ?: "")
+        val checkedItem = localeKeys.indexOf(currentTag).coerceAtLeast(0)
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.language)
+            .setSingleChoiceItems(localeNames, checkedItem) { dialog, which ->
+                val selectedTag = localeKeys[which]
+                val newLocales = if (selectedTag.isEmpty()) {
+                    androidx.core.os.LocaleListCompat.getEmptyLocaleList()
+                } else {
+                    androidx.core.os.LocaleListCompat.forLanguageTags(selectedTag)
+                }
+                dialog.dismiss()
+                // Fade out, then apply locale (which triggers recreate with fade in)
+                val rootView = findViewById<android.view.View>(android.R.id.content)
+                if (rootView != null) {
+                    rootView.animate()
+                        .alpha(0f)
+                        .setDuration(400)
+                        .withEndAction {
+                            BaseActivity.requestFadeInAnimation()
+                            androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(newLocales)
+                        }
+                        .start()
+                } else {
+                    androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(newLocales)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
 

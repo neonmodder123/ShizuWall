@@ -14,9 +14,23 @@ open class BaseActivity : AppCompatActivity() {
 
     companion object {
         private var shouldAnimateFadeIn = false
+
+        fun requestFadeInAnimation() {
+            shouldAnimateFadeIn = true
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Disable system transition if we're doing our own fade animation
+        if (shouldAnimateFadeIn) {
+            if (android.os.Build.VERSION.SDK_INT >= 34) {
+                overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0)
+            } else {
+                @Suppress("DEPRECATION")
+                overridePendingTransition(0, 0)
+            }
+        }
+        
         val prefs = getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE)
         currentFont = prefs.getString(MainActivity.KEY_SELECTED_FONT, "default") ?: "default"
         currentDynamicColor = prefs.getBoolean(MainActivity.KEY_USE_DYNAMIC_COLOR, true)
@@ -42,7 +56,8 @@ open class BaseActivity : AppCompatActivity() {
             rootView.alpha = 0f
             rootView.animate()
                 .alpha(1f)
-                .setDuration(400)
+                .setDuration(350)
+                .setStartDelay(50)
                 .start()
         }
     }

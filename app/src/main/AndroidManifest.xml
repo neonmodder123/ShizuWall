@@ -23,6 +23,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ShizuWall"
         android:extractNativeLibs="false"
+        android:localeConfig="@xml/locales_config"
         tools:targetApi="31">
         <activity
             android:name=".ui.MainActivity"

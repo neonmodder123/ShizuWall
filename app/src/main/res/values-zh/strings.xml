@@ -133,6 +133,8 @@
     <string name="auto_enable_on_shizuku_start_description">当 Shizuku 服务可用时自动启用防火墙</string>
     <string name="appearance_section">外观</string>
     <string name="font">字体</string>
+    <string name="language">语言</string>
+    <string name="language_system_default">系统默认</string>
     <string name="advanced_section">高级</string>
     <string name="adb_broadcast_usage_description">使用 adb 控制防火墙的快速指南</string>
     <string name="data_management_section">数据管理</string>

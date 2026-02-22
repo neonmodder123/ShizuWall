@@ -132,6 +132,8 @@
     <string name="app_installed_notification_channel_description">新しいアプリがインストールされたときの通知</string>
     <string name="appearance_section">外観</string>
     <string name="font">フォント</string>
+    <string name="language">言語</string>
+    <string name="language_system_default">システムのデフォルト</string>
     <string name="advanced_section">高度な設定</string>
     <string name="adb_broadcast_usage_description">adb を使用したファイアウォール制御のクイックガイド</string>
     <string name="data_management_section">データ管理</string>

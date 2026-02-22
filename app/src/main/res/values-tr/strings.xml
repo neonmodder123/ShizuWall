@@ -134,6 +134,8 @@
     <string name="auto_enable_on_shizuku_start_description">Shizuku hizmeti kullanılabilir hale geldiğinde güvenlik duvarını otomatik olarak etkinleştir</string>
     <string name="appearance_section">Görünüm</string>
     <string name="font">Yazı Tipi</string>
+    <string name="language">Dil</string>
+    <string name="language_system_default">Sistem varsayılanı</string>
     <string name="advanced_section">Gelişmiş</string>
     <string name="adb_broadcast_usage_description">Güvenlik duvarını kontrol etmek için adb kullanımına hızlı rehber</string>
     <string name="data_management_section">Veri Yönetimi</string>

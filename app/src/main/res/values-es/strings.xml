@@ -132,6 +132,8 @@
     <string name="app_installed_notification_channel_description">Notificaciones al instalar una app nueva</string>
     <string name="appearance_section">Apariencia</string>
     <string name="font">Fuente</string>
+    <string name="language">Idioma</string>
+    <string name="language_system_default">Predeterminado del sistema</string>
     <string name="advanced_section">Avanzado</string>
     <string name="adb_broadcast_usage_description">Guía rápida para usar adb para controlar el firewall</string>
     <string name="data_management_section">Gestión de datos</string>
