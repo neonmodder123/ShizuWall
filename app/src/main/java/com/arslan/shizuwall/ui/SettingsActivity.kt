@@ -45,6 +45,7 @@ import rikka.shizuku.Shizuku
 class SettingsActivity : BaseActivity() {
 
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var prefs: SharedPreferences
     private lateinit var switchMoveSelectedTop: SwitchCompat
     private lateinit var switchSkipConfirm: SwitchCompat
     private lateinit var switchSkipErrorDialog: SwitchCompat
@@ -193,7 +194,7 @@ class SettingsActivity : BaseActivity() {
     }
 
     private fun loadSettings() {
-        val prefs = getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE)
+        prefs = getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE)
 
         switchMoveSelectedTop.isChecked = prefs.getBoolean(MainActivity.KEY_MOVE_SELECTED_TOP, true)
         switchSkipConfirm.isChecked = prefs.getBoolean("skip_enable_confirm", false)
@@ -315,7 +316,6 @@ class SettingsActivity : BaseActivity() {
     }
 
     private fun setupListeners() {
-        val prefs = getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE)
 
         switchMoveSelectedTop.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit().putBoolean(MainActivity.KEY_MOVE_SELECTED_TOP, isChecked).apply()
@@ -354,21 +354,25 @@ class SettingsActivity : BaseActivity() {
             TransitionManager.beginDelayedTransition(findViewById(R.id.settingsRoot), AutoTransition())
             updateFirewallModeUI(newMode)
             
-            // Show info dialog and auto-enable accessibility for Smart Foreground mode
+            // Handle accessibility for Smart Foreground mode
             if (newMode == FirewallMode.SMART_FOREGROUND) {
                 if (!ForegroundDetectionService.isServiceEnabled(this)) {
-                    // Try to auto-enable via shell
-                    lifecycleScope.launch {
-                        val success = ForegroundDetectionService.enableServiceViaShell(this@SettingsActivity)
-                        if (success) {
-                            updateFirewallModeUI(newMode)
+                    // Check dialog status
+                    val dialogShown = sharedPreferences.getBoolean("accessibility_dialog_shown", false)
+                    val dialogAccepted = sharedPreferences.getBoolean("accessibility_dialog_accepted", false)
+                    
+                    if (!dialogShown || !dialogAccepted) {
+                        // Show permission dialog
+                        showAccessibilityPermissionDialog()
+                    } else {
+                        // Previously accepted, try to auto-enable again
+                        lifecycleScope.launch {
+                            val success = ForegroundDetectionService.enableServiceViaShell(this@SettingsActivity)
+                            if (success) {
+                                updateFirewallModeUI(newMode)
+                            }
                         }
-                        // Show info dialog regardless
-                        showSmartForegroundInfoDialog(success)
                     }
-                } else {
-                    // Already enabled, just show info
-                    showSmartForegroundInfoDialog(true)
                 }
             }
             
@@ -522,11 +526,7 @@ class SettingsActivity : BaseActivity() {
         val showPrompt = sharedPreferences.getBoolean("show_smart_foreground_prompt", true)
         if (!showPrompt) return
 
-        val message = if (accessibilityGranted) {
-            getString(R.string.smart_foreground_info_enabled)
-        } else {
-            getString(R.string.smart_foreground_info_deferred)
-        }
+        val message = getString(R.string.smart_foreground_info_enabled)
         
         val promptView = layoutInflater.inflate(R.layout.dialog_shizuku_prompt, null)
         val messageText: TextView = promptView.findViewById(R.id.shizuku_prompt_message_text)
@@ -544,6 +544,48 @@ class SettingsActivity : BaseActivity() {
                 }
             }
             .show()
+    }
+
+    private fun showAccessibilityPermissionDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.accessibility_permission_title)
+            .setMessage(R.string.accessibility_permission_message)
+            .setCancelable(true)
+            .setPositiveButton(R.string.accept) { _, _ ->
+                // Mark as shown and accepted
+                sharedPreferences.edit()
+                    .putBoolean("accessibility_dialog_shown", true)
+                    .putBoolean("accessibility_dialog_accepted", true)
+                    .apply()
+                // Open accessibility settings
+                val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                startActivity(intent)
+            }
+            .setNegativeButton(R.string.decline) { _, _ ->
+                // Mark as shown and declined
+                sharedPreferences.edit()
+                    .putBoolean("accessibility_dialog_shown", true)
+                    .putBoolean("accessibility_dialog_accepted", false)
+                    .apply()
+                // Revert to default mode
+                revertToDefaultMode()
+            }
+            .setOnCancelListener {
+                // Mark as shown and declined if dismissed
+                sharedPreferences.edit()
+                    .putBoolean("accessibility_dialog_shown", true)
+                    .putBoolean("accessibility_dialog_accepted", false)
+                    .apply()
+                // Revert to default mode if dialog is dismissed
+                revertToDefaultMode()
+            }
+            .show()
+    }
+
+    private fun revertToDefaultMode() {
+        prefs.edit().putString(MainActivity.KEY_FIREWALL_MODE, FirewallMode.DEFAULT.name).apply()
+        radioGroupFirewallMode.check(R.id.radioModeDefault)
+        updateFirewallModeUI(FirewallMode.DEFAULT)
     }
 
     /**

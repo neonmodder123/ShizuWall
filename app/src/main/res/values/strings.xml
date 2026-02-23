@@ -294,4 +294,8 @@
     <string name="do_not_show_again">Do not show again</string>
     <string name="select_font">Select Font</string>
     <string name="apply">Apply</string>
+    <string name="accessibility_permission_title">Accessibility Permission Required</string>
+    <string name="accessibility_permission_message">This app requires AccessibilityService API to monitor foreground app changes for Smart Foreground mode. The API will be used to detect when you switch between apps and automatically update firewall rules accordingly. No personal data is collected or transmitted.</string>
+    <string name="accept">Accept</string>
+    <string name="decline">Decline</string>
 </resources>
