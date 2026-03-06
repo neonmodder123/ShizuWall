@@ -15,7 +15,9 @@
     <string name="enable_firewall">Firewall</string>
     <string name="font_default">Standard</string>
     <string name="font_ndot">Ndot</string>
-    <string name="select_all">Alle auswählen</string>    <string name="cat_favorites">Favoriten</string>    <string name="made_by">Mit ❤️ gemacht von Ahmet Can Arslan</string>
+    <string name="select_all">Alle auswählen</string>
+    <string name="cat_favorites">Favoriten</string>
+    <string name="made_by">Mit ❤️ gemacht von Ahmet Can Arslan</string>
     <string name="reset_app_menu">App zurücksetzen</string>
     <string name="theme_changed_title">Theme geändert</string>
     <string name="theme_changed_message">Das Theme wurde aktualisiert. Bitte starten Sie die App neu, um die Änderungen anzuwenden.</string>
@@ -295,4 +297,12 @@
     <string name="firewall_mode_whitelist_description">Alle Apps standardmäßig blockieren, ausgewählte Apps erlauben</string>
     <string name="whitelist_info_system_apps_warning">Wenn "System-Apps anzeigen" deaktiviert ist, werden System-Apps im Whitelist-Modus nicht durch die Firewall geschützt.\n\nWenn Sie "System-Apps anzeigen" aktiviert haben und den Whitelist-Modus verwenden, wurde diese Kombination nicht vollständig getestet. Verwenden Sie sie mit Vorsicht.</string>
     <string name="firewall_mode_change_disabled">Firewall-Modus kann nicht geändert werden, während die Firewall aktiviert ist. Bitte deaktivieren Sie zuerst die Firewall.</string>
+    <string name="floating_button">Schwebende Firewall-Schaltfläche</string>
+    <string name="floating_button_description">Zeigt eine schwebende Schaltfläche an, um die Firewall von überall aus zu schalten</string>
+    <string name="floating_button_notification_channel_name">Schwebende Schaltfläche (Dienst)</string>
+    <string name="floating_button_notification_channel_description">Hintergrunddienst für die schwebende Firewall-Schaltfläche</string>
+    <string name="floating_button_notification_title">Schwebende Firewall-Schaltfläche</string>
+    <string name="floating_button_notification_text">Tippen Sie auf die schwebende Schaltfläche, um die Firewall umzuschalten</string>
+    <string name="floating_button_content_description">Firewall umschalten</string>
+    <string name="overlay_permission_required">Überlagerungsberechtigung ist für die schwebende Schaltfläche erforderlich</string>
 </resources>

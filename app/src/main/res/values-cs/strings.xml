@@ -294,6 +294,10 @@
     <string name="do_not_show_again">Znovu nezobrazovat</string>
     <string name="select_font">Vybrat písmo</string>
     <string name="apply">Aplikovat</string>
+    <string name="accessibility_permission_title">Vyžadováno oprávnění k přístupnosti</string>
+    <string name="accessibility_permission_message">Tato aplikace vyžaduje rozhraní AccessibilityService API ke sledování změn aplikací na popředí pro režim inteligentního popředí. Rozhraní API bude použito k detekci přepínání mezi aplikacemi a k automatické aktualizaci pravidel brány firewall. Nejsou shromažďovány ani přenášeny žádné osobní údaje.</string>
+    <string name="accept">Přijmout</string>
+    <string name="decline">Odmítnout</string>
 
         <!-- Floating Firewall Button -->
     <string name="floating_button">Plovoucí tlačítko firewallu</string>

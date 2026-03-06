@@ -299,4 +299,12 @@
     <string name="firewall_mode_whitelist_description">デフォルトですべてのアプリをブロックし、選択されたアプリを許可</string>
     <string name="whitelist_info_system_apps_warning">"システムアプリを表示"が無効の場合、ホワイトリストモードでシステムアプリはファイアウォールの対象になりません。\n\n"システムアプリを表示"を有効にしてホワイトリストモードを使用している場合、この組み合わせは十分にテストされていません。注意して使用してください。</string>
     <string name="firewall_mode_change_disabled">ファイアウォールが有効になっている間はモードを変更できません。まずファイアウォールを無効にしてください。</string>
+    <string name="floating_button">フローティング・ファイアウォール・ボタン</string>
+    <string name="floating_button_description">どこからでもファイアウォールを切り替えるためのドラッグ可能なオーバーレイボタンを表示します</string>
+    <string name="floating_button_notification_channel_name">フローティングボタン (サービス)</string>
+    <string name="floating_button_notification_channel_description">フローティング・ファイアウォール・ボタンのバックグラウンドサービス</string>
+    <string name="floating_button_notification_title">フローティング・ファイアウォール・ボタン</string>
+    <string name="floating_button_notification_text">フローティングボタンをタップしてファイアウォールを切り替えます</string>
+    <string name="floating_button_content_description">ファイアウォールを切り替え</string>
+    <string name="overlay_permission_required">フローティングボタンにはオーバーレイ権限が必要です</string>
 </resources>

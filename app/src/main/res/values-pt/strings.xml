@@ -297,4 +297,12 @@
     <string name="firewall_mode_whitelist_description">Bloquear todos os apps por padrão, permitir apps selecionados</string>
     <string name="whitelist_info_system_apps_warning">Quando "Mostrar apps do sistema" está desativado, os apps do sistema não serão bloqueados pelo firewall no modo Lista branca.\n\nSe você ativou "Mostrar apps do sistema" e está usando o modo Lista branca, esta combinação não foi totalmente testada. Use com cuidado.</string>
     <string name="firewall_mode_change_disabled">Não é possível alterar o modo de firewall enquanto está ativado. Por favor, desative o firewall primeiro.</string>
+    <string name="floating_button">Botão Flutuante de Firewall</string>
+    <string name="floating_button_description">Mostrar um botão de sobreposição arrastável para alternar o firewall de qualquer lugar</string>
+    <string name="floating_button_notification_channel_name">Botão Flutuante (Serviço)</string>
+    <string name="floating_button_notification_channel_description">Serviço em segundo plano para o botão flutuante de firewall</string>
+    <string name="floating_button_notification_title">Botão Flutuante de Firewall</string>
+    <string name="floating_button_notification_text">Toque no botão flutuante para alternar o firewall</string>
+    <string name="floating_button_content_description">Alternar firewall</string>
+    <string name="overlay_permission_required">A permissão de sobreposição é necessária para o botão flutuante</string>
 </resources>

@@ -297,4 +297,12 @@
     <string name="firewall_mode_whitelist_description">Varsayılan olarak tüm uygulamaları engelle, seçili uygulamalara izin ver</string>
     <string name="whitelist_info_system_apps_warning">"Sistem uygulamalarını göster" devre dışı bırakıldığında, sistem uygulamaları Beyaz Liste modunda güvenlik duvarı tarafından engellenmez.\n\n"Sistem uygulamalarını göster" seçeneğini etkinleştirdiyseniz ve Beyaz Liste modunu kullanıyorsanız, bu kombinasyon tam olarak test edilmemiştir. Dikkatli kullanın.</string>
     <string name="firewall_mode_change_disabled">Güvenlik duvarı etkinleştirilirken modu değiştiremezsiniz. Lütfen önce güvenlik duvarını devre dışı bırakın.</string>
+    <string name="floating_button">Yüzen Güvenlik Duvarı Butonu</string>
+    <string name="floating_button_description">Güvenlik duvarını her yerden değiştirmek için sürüklenebilir bir yer paylaşımı butonu gösterin</string>
+    <string name="floating_button_notification_channel_name">Yüzen Buton (Servis)</string>
+    <string name="floating_button_notification_channel_description">Yüzen güvenlik duvarı butonu için arka plan servisi</string>
+    <string name="floating_button_notification_title">Yüzen Güvenlik Duvarı Butonu</string>
+    <string name="floating_button_notification_text">Güvenlik duvarını değiştirmek için yüzen butona dokunun</string>
+    <string name="floating_button_content_description">Güvenlik duvarını değiştir</string>
+    <string name="overlay_permission_required">Yüzen buton için üzerine yazma izni gereklidir</string>
 </resources>
