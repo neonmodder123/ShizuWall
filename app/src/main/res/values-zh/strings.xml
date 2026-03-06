@@ -60,7 +60,7 @@
     <string name="shizuku_required_title">Shizuku 模式</string>
     <string name="shizuku_required_message">开发者不对任何负面后果负责。请在继续之前安装并激活 Shizuku。</string>
     <string name="onboarding_mode_selection_title">选择工作模式</string>
-    <string name="onboarding_mode_selection_message">ShizuWall 可以工作在两种模式下。Shizuku 推荐给大多数用户。LADB 是一个使用本地 ADB 守护进程的替代方案。工作模式稍后可以更改。</string>
+    <string name="onboarding_mode_selection_message">ShizuWall 可以工作在两种模式下。Shizuku 推荐给大多数用户。如果您的设备不支持 Shizuku，您可以选择 LADB 模式。LADB 是一个使用本地 ADB 守护进程的替代方案。工作模式稍后可以更改。</string>
     <string name="use_shizuku">使用 Shizuku</string>
     <string name="use_ladb">使用 LADB</string>
     <string name="ladb_onboarding_message">LADB 模式允许 ShizuWall 通过使用本地 ADB 守护进程来工作。您需要在设置中的 LADB 设置页面上与无线调试配对一次。开发者不对任何负面后果负责。</string>

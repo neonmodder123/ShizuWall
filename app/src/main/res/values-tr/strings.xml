@@ -61,7 +61,7 @@
     <string name="shizuku_required_title">Shizuku Modu</string>
     <string name="shizuku_required_message">Geliştirici herhangi bir olumsuz sonuçtan sorumlu değildir. Lütfen devam etmeden önce Shizuku\'yu kurun ve etkinleştirin.</string>
     <string name="onboarding_mode_selection_title">Çalışma Modunu Seçin</string>
-    <string name="onboarding_mode_selection_message">ShizuWall iki modda çalışabilir. Shizuku çoğu kullanıcı için önerilir. LADB, yerel bir ADB daemon\'ı kullanan bir alternatiftir. Çalışma Modu daha sonra değiştirilebilir.</string>
+    <string name="onboarding_mode_selection_message">ShizuWall iki modda çalışabilir. Shizuku çoğu kullanıcı için önerilir. Cihazınız Shizuku\'yu desteklemiyorsa LADB modunu seçebilirsiniz. LADB, yerel bir ADB daemon\'ı kullanan bir alternatiftir. Çalışma Modu daha sonra değiştirilebilir.</string>
     <string name="use_shizuku">Shizuku Kullan</string>
     <string name="use_ladb">LADB Kullan</string>
     <string name="ladb_onboarding_message">LADB modu, ShizuWall\'un yerel bir ADB daemon\'ı kullanarak çalışmasını sağlar. Ayarlarda bulunan LADB Kurulum sayfasında bir kez Kablosuz Hata Ayıklama ile eşleştirmeniz gerekecektir. Geliştirici herhangi bir olumsuz sonuçtan sorumlu değildir.</string>

@@ -59,7 +59,7 @@
     <string name="shizuku_required_title">Режим Shizuku</string>
     <string name="shizuku_required_message">Разработчик не несет ответственности за любые негативные последствия. Пожалуйста, установите и активируйте Shizuku перед продолжением.</string>
     <string name="onboarding_mode_selection_title">Выберите рабочий режим</string>
-    <string name="onboarding_mode_selection_message">ShizuWall может работать в двух режимах. Shizuku рекомендуется для большинства пользователей. LADB — это альтернатива, использующая локальный демон ADB. Рабочий режим можно изменить позже</string>
+    <string name="onboarding_mode_selection_message">ShizuWall может работать в двух режимах. Shizuku рекомендуется для большинства пользователей. Если ваше устройство не поддерживает Shizuku, вы можете выбрать режим LADB. LADB — это альтернатива, использующая локальный демон ADB. Рабочий режим можно изменить позже</string>
     <string name="use_shizuku">Использовать Shizuku</string>
     <string name="use_ladb">Использовать LADB</string>
     <string name="ladb_onboarding_message">Режим LADB позволяет ShizuWall работать с использованием локального демона ADB. Вам потребуется один раз выполнить сопряжение с Беспроводной отладкой на странице настройки LADB в настройках. Разработчик не несет ответственности за любые негативные последствия.</string>

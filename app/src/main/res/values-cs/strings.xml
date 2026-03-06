@@ -62,7 +62,7 @@
     <string name="shizuku_required_title">Shizuku režim</string>
     <string name="shizuku_required_message">Vývojář nenese odpovědnost za žádné negativní důsledky. Před pokračováním nainstalujte a aktivujte Shizuku.</string>
     <string name="onboarding_mode_selection_title">Zvolte Pracovní režim</string>
-    <string name="onboarding_mode_selection_message">ShizuWall může pracovat ve dvou režimech. Pro většinu uživatelů se doporučuje Shizuku. LADB je alternativa, která používá lokální ADB daemon. Pracovní režim lze změnit později.</string>
+    <string name="onboarding_mode_selection_message">ShizuWall může pracovat ve dvou režimech. Pro většinu uživatelů se doporučuje Shizuku. Pokud vaše zařízení nepodporuje Shizuku, můžete zvolit režim LADB. LADB je alternativa, která používá lokální ADB daemon. Pracovní režim lze změnit později.</string>
     <string name="use_shizuku">Použít Shizuku</string>
     <string name="use_ladb">Použít LADB</string>
     <string name="ladb_onboarding_message">Režim LADB umožňuje ShizuWall pracovat pomocí lokálního daemona ADB. Na stránce Nastavení LADB v nastaveních budete muset jednou spárovat přes Bezdrátové ladění. Vývojář nenese odpovědnost za žádné negativní důsledky.</string>

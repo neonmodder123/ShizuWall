@@ -59,7 +59,7 @@
     <string name="shizuku_required_title">Shizuku モード</string>
     <string name="shizuku_required_message">開発者は、発生したいかなる悪影響についても責任を負いません。続行する前に Shizuku をインストールして起動してください。</string>
     <string name="onboarding_mode_selection_title">動作モードの選択</string>
-    <string name="onboarding_mode_selection_message">ShizuWall は 2 つのモードで動作します。ほとんどのユーザーには Shizuku が推奨されます。LADB はローカル ADB デーモンを使用する代替手段です。動作モードは後で変更できます</string>
+    <string name="onboarding_mode_selection_message">ShizuWall は 2 つのモードで動作します。ほとんどのユーザーには Shizuku が推奨されます。デバイスが Shizuku をサポートしていない場合は、LADB モードを選択できます。LADB はローカル ADB デーモンを使用する代替手段です。動作モードは後で変更できます</string>
     <string name="use_shizuku">Shizuku を使用</string>
     <string name="use_ladb">LADB を使用</string>
     <string name="ladb_onboarding_message">LADB モードでは、ローカル ADB デーモンを使用して ShizuWall を動作させることができます。設定内の LADB セットアップページで、一度「ワイヤレスデバッグ」とペアリングする必要があります。開発者は、発生したいかなる悪影響についても責任を負いません。</string>

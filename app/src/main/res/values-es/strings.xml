@@ -59,7 +59,7 @@
     <string name="shizuku_required_title">Modo Shizuku</string>
     <string name="shizuku_required_message">El desarrollador no se hace responsable de consecuencias negativas. Instala y activa Shizuku antes de continuar.</string>
     <string name="onboarding_mode_selection_title">Elige el modo de trabajo</string>
-    <string name="onboarding_mode_selection_message">ShizuWall puede funcionar en dos modos. Se recomienda Shizuku para la mayoría. LADB es una alternativa que usa un demonio ADB local. El modo se puede cambiar después.</string>
+    <string name="onboarding_mode_selection_message">ShizuWall puede funcionar en dos modos. Se recomienda Shizuku para la mayoría de los usuarios. Si tu dispositivo no es compatible con Shizuku, puedes elegir el modo LADB. LADB es una alternativa que usa un demonio ADB local. el modo se puede cambiar después.</string>
     <string name="use_shizuku">Usar Shizuku</string>
     <string name="use_ladb">Usar LADB</string>
     <string name="ladb_onboarding_message">LADB permite que ShizuWall funcione usando un demonio ADB local. Deberás vincularlo con Depuración inalámbrica una vez en la página de configuración de LADB en ajustes. El desarrollador no se hace responsable de consecuencias negativas.</string>

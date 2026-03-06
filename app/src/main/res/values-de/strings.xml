@@ -60,7 +60,7 @@
     <string name="shizuku_required_title">Shizuku-Modus</string>
     <string name="shizuku_required_message">Der Entwickler ist nicht verantwortlich für negative Konsequenzen. Bitte installieren und aktivieren Sie Shizuku, bevor Sie fortfahren.</string>
     <string name="onboarding_mode_selection_title">Arbeitsmodus wählen</string>
-    <string name="onboarding_mode_selection_message">ShizuWall kann in zwei Modi arbeiten. Shizuku wird für die meisten Benutzer empfohlen. LADB ist eine Alternative, die einen lokalen ADB-Daemon verwendet. Der Arbeitsmodus kann später geändert werden.</string>
+    <string name="onboarding_mode_selection_message">ShizuWall kann in zwei Modi arbeiten. Shizuku wird für die meisten Benutzer empfohlen. Wenn Ihr Gerät Shizuku nicht unterstützt, können Sie den LADB-Modus wählen. LADB ist eine Alternative, die einen lokalen ADB-Daemon verwendet. Der Arbeitsmodus kann später geändert werden.</string>
     <string name="use_shizuku">Shizuku verwenden</string>
     <string name="use_ladb">LADB verwenden</string>
     <string name="ladb_onboarding_message">Der LADB-Modus ermöglicht es ShizuWall, einen lokalen ADB-Daemon zu verwenden. Sie müssen einmalig eine Kopplung mit Wireless-Debugging auf der LADB-Setup-Seite in den Einstellungen durchführen. Der Entwickler ist nicht verantwortlich für negative Konsequenzen.</string>
