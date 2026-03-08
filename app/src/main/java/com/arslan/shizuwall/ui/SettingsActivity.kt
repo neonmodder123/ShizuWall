@@ -32,8 +32,10 @@ import android.graphics.Typeface
 import android.os.Build
 import androidx.appcompat.widget.SwitchCompat
 import com.arslan.shizuwall.FirewallMode
+import com.arslan.shizuwall.WorkingMode
 import com.arslan.shizuwall.R
 import com.arslan.shizuwall.ladb.LadbManager
+import com.arslan.shizuwall.shell.RootShellExecutor
 import com.arslan.shizuwall.services.AppMonitorService
 import com.arslan.shizuwall.services.ForegroundDetectionService
 import com.arslan.shizuwall.utils.ShizukuPackageResolver
@@ -72,10 +74,12 @@ class SettingsActivity : BaseActivity() {
     private lateinit var radioGroupWorkingMode: RadioGroup
     private lateinit var radioShizukuMode: RadioButton
     private lateinit var radioLadbMode: RadioButton
+    private lateinit var radioRootMode: RadioButton
     private lateinit var cardSetLadb: com.google.android.material.card.MaterialCardView
     private lateinit var layoutSetLadb: LinearLayout
     private lateinit var cardSkipConfirm: com.google.android.material.card.MaterialCardView
     private var autoEnablePreviousState: Boolean = false  // Store previous state before disabling
+    private var suppressWorkingModeListener = false
     
     // Firewall Mode Selector
     private lateinit var radioGroupFirewallMode: RadioGroup
@@ -198,6 +202,7 @@ class SettingsActivity : BaseActivity() {
         radioGroupWorkingMode = findViewById(R.id.radioGroupWorkingMode)
         radioShizukuMode = findViewById(R.id.radioShizukuMode)
         radioLadbMode = findViewById(R.id.radioLadbMode)
+        radioRootMode = findViewById(R.id.radioRootMode)
         cardSetLadb = findViewById(R.id.cardSetLadb)
         layoutSetLadb = findViewById(R.id.layoutSetLadb)
         switchAppMonitor = findViewById(R.id.switchAppMonitor)
@@ -257,9 +262,11 @@ class SettingsActivity : BaseActivity() {
         )
 
         // Load working mode
-        val workingModeName = prefs.getString(MainActivity.KEY_WORKING_MODE, com.arslan.shizuwall.WorkingMode.SHIZUKU.name)
-        when (com.arslan.shizuwall.WorkingMode.fromName(workingModeName)) {
-            com.arslan.shizuwall.WorkingMode.LADB -> radioGroupWorkingMode.check(R.id.radioLadbMode)
+        val workingModeName = prefs.getString(MainActivity.KEY_WORKING_MODE, WorkingMode.SHIZUKU.name)
+        val workingMode = WorkingMode.fromName(workingModeName)
+        when (workingMode) {
+            WorkingMode.LADB -> radioGroupWorkingMode.check(R.id.radioLadbMode)
+            WorkingMode.ROOT -> radioGroupWorkingMode.check(R.id.radioRootMode)
             else -> radioGroupWorkingMode.check(R.id.radioShizukuMode)
         }
 
@@ -272,16 +279,11 @@ class SettingsActivity : BaseActivity() {
             }
             if (radioLadbMode.isChecked) {
                 radioGroupWorkingMode.check(R.id.radioShizukuMode)
-                prefs.edit().putString(MainActivity.KEY_WORKING_MODE, com.arslan.shizuwall.WorkingMode.SHIZUKU.name).apply()
+                prefs.edit().putString(MainActivity.KEY_WORKING_MODE, WorkingMode.SHIZUKU.name).apply()
             }
         }
-        // Show/hide LADB card if not selected
-        val ladbSelected = radioLadbMode.isChecked
-        cardSetLadb.visibility = if (ladbSelected) View.VISIBLE else View.GONE
-        
-        // Hide auto-enable firewall card when LADB mode is selected
-        cardAutoEnableOnShizukuStart.visibility = if (ladbSelected) View.GONE else View.VISIBLE
-        switchAutoEnableOnShizukuStart.isEnabled = !ladbSelected
+
+        updateWorkingModeDependentUi(workingMode, restoreAutoEnable = false)
     }
     
     /**
@@ -490,31 +492,33 @@ class SettingsActivity : BaseActivity() {
         }
 
         radioGroupWorkingMode.setOnCheckedChangeListener { _, checkedId ->
-            val mode = if (checkedId == R.id.radioLadbMode) com.arslan.shizuwall.WorkingMode.LADB else com.arslan.shizuwall.WorkingMode.SHIZUKU
+            if (suppressWorkingModeListener) return@setOnCheckedChangeListener
+
+            val currentMode = WorkingMode.fromName(prefs.getString(MainActivity.KEY_WORKING_MODE, WorkingMode.SHIZUKU.name))
+            val mode = when (checkedId) {
+                R.id.radioLadbMode -> WorkingMode.LADB
+                R.id.radioRootMode -> WorkingMode.ROOT
+                else -> WorkingMode.SHIZUKU
+            }
+            if (mode == currentMode) return@setOnCheckedChangeListener
+
+            if (mode == WorkingMode.ROOT && !RootShellExecutor.hasRootAccess()) {
+                showRootNotFoundDialog()
+                suppressWorkingModeListener = true
+                when (currentMode) {
+                    WorkingMode.LADB -> radioGroupWorkingMode.check(R.id.radioLadbMode)
+                    WorkingMode.ROOT -> radioGroupWorkingMode.check(R.id.radioRootMode)
+                    else -> radioGroupWorkingMode.check(R.id.radioShizukuMode)
+                }
+                suppressWorkingModeListener = false
+                return@setOnCheckedChangeListener
+            }
+
             prefs.edit().putString(MainActivity.KEY_WORKING_MODE, mode.name).apply()
             setResult(RESULT_OK)
             
             TransitionManager.beginDelayedTransition(findViewById(R.id.settingsRoot), AutoTransition())
-            // Update UI affordance for LADB setup
-            val isLadb = mode == com.arslan.shizuwall.WorkingMode.LADB
-            cardSetLadb.visibility = if (isLadb) View.VISIBLE else View.GONE
-
-            if (isLadb) {
-                autoEnablePreviousState = switchAutoEnableOnShizukuStart.isChecked
-                cardAutoEnableOnShizukuStart.visibility = View.GONE
-                switchAutoEnableOnShizukuStart.isEnabled = false
-                if (switchAutoEnableOnShizukuStart.isChecked) {
-                    switchAutoEnableOnShizukuStart.isChecked = false
-                    prefs.edit().putBoolean(MainActivity.KEY_AUTO_ENABLE_ON_SHIZUKU_START, false).apply()
-                }
-            } else {
-                cardAutoEnableOnShizukuStart.visibility = View.VISIBLE
-                switchAutoEnableOnShizukuStart.isEnabled = true
-                if (autoEnablePreviousState) {
-                    switchAutoEnableOnShizukuStart.isChecked = true
-                    prefs.edit().putBoolean(MainActivity.KEY_AUTO_ENABLE_ON_SHIZUKU_START, true).apply()
-                }
-            }
+            updateWorkingModeDependentUi(mode, restoreAutoEnable = true)
         }
 
         layoutSetLadb.setOnClickListener {
@@ -597,6 +601,38 @@ class SettingsActivity : BaseActivity() {
                 }
             }
             .show()
+    }
+
+    private fun showRootNotFoundDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.working_mode_root)
+            .setMessage(R.string.root_not_found_message)
+            .setPositiveButton(R.string.ok, null)
+            .setCancelable(true)
+            .show()
+    }
+
+    private fun updateWorkingModeDependentUi(mode: WorkingMode, restoreAutoEnable: Boolean) {
+        val isLadb = mode == WorkingMode.LADB
+        val isShizuku = mode == WorkingMode.SHIZUKU
+
+        cardSetLadb.visibility = if (isLadb) View.VISIBLE else View.GONE
+        cardAutoEnableOnShizukuStart.visibility = if (isShizuku) View.VISIBLE else View.GONE
+        switchAutoEnableOnShizukuStart.isEnabled = isShizuku
+
+        if (!isShizuku) {
+            autoEnablePreviousState = switchAutoEnableOnShizukuStart.isChecked
+            if (switchAutoEnableOnShizukuStart.isChecked) {
+                switchAutoEnableOnShizukuStart.isChecked = false
+                prefs.edit().putBoolean(MainActivity.KEY_AUTO_ENABLE_ON_SHIZUKU_START, false).apply()
+            }
+            return
+        }
+
+        if (restoreAutoEnable && autoEnablePreviousState) {
+            switchAutoEnableOnShizukuStart.isChecked = true
+            prefs.edit().putBoolean(MainActivity.KEY_AUTO_ENABLE_ON_SHIZUKU_START, true).apply()
+        }
     }
 
     private fun showAccessibilityPermissionDialog() {
@@ -1080,6 +1116,8 @@ class SettingsActivity : BaseActivity() {
                                 } catch (t: Throwable) {
                                     false
                                 }
+                            } else if (mode == "ROOT") {
+                                RootShellExecutor.hasRootAccess()
                             } else {
                                 com.arslan.shizuwall.ladb.LadbManager.getInstance(this@SettingsActivity).isConnected()
                             }

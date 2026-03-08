@@ -58,7 +58,9 @@ import com.arslan.shizuwall.R
 import kotlin.comparisons.*
 import com.arslan.shizuwall.adapters.ErrorEntry
 import com.arslan.shizuwall.FirewallMode
+import com.arslan.shizuwall.WorkingMode
 import com.arslan.shizuwall.shizuku.ShizukuSetupActivity
+import com.arslan.shizuwall.shell.RootShellExecutor
 import com.arslan.shizuwall.shell.ShellExecutorProvider
 import com.arslan.shizuwall.utils.ShizukuPackageResolver
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -142,7 +144,7 @@ class MainActivity : BaseActivity() {
 
     private val binderReceivedListener = Shizuku.OnBinderReceivedListener {
         val workingMode = sharedPreferences.getString(KEY_WORKING_MODE, "SHIZUKU") ?: "SHIZUKU"
-        if (workingMode == "LADB") return@OnBinderReceivedListener
+        if (workingMode != WorkingMode.SHIZUKU.name) return@OnBinderReceivedListener
 
         val autoEnable = sharedPreferences.getBoolean(KEY_AUTO_ENABLE_ON_SHIZUKU_START, false)
         if (!autoEnable) {
@@ -216,7 +218,7 @@ class MainActivity : BaseActivity() {
 
     private val binderDeadListener = Shizuku.OnBinderDeadListener {
         val workingMode = sharedPreferences.getString(KEY_WORKING_MODE, "SHIZUKU") ?: "SHIZUKU"
-        if (workingMode == "LADB") return@OnBinderDeadListener
+        if (workingMode != WorkingMode.SHIZUKU.name) return@OnBinderDeadListener
 
         Toast.makeText(this, getString(R.string.shizuku_service_dead), Toast.LENGTH_SHORT).show()
         finish()
@@ -750,6 +752,18 @@ class MainActivity : BaseActivity() {
 
     private fun checkPermission(code: Int): Boolean {
         val workingMode = sharedPreferences.getString(KEY_WORKING_MODE, "SHIZUKU") ?: "SHIZUKU"
+        if (workingMode == WorkingMode.ROOT.name) {
+            if (RootShellExecutor.hasRootAccess()) return true
+
+            MaterialAlertDialogBuilder(this)
+                .setTitle(getString(R.string.working_mode_root))
+                .setMessage(getString(R.string.root_not_found_message))
+                .setPositiveButton(getString(R.string.ok), null)
+                .setCancelable(true)
+                .show()
+            return false
+        }
+
         if (workingMode == "LADB") {
             val daemonManager = com.arslan.shizuwall.daemon.PersistentDaemonManager(this)
             if (daemonManager.isDaemonRunning()) return true

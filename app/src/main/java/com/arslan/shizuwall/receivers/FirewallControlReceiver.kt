@@ -9,6 +9,7 @@ import android.os.SystemClock
 import android.widget.Toast
 import com.arslan.shizuwall.FirewallMode
 import com.arslan.shizuwall.R
+import com.arslan.shizuwall.shell.RootShellExecutor
 import com.arslan.shizuwall.shell.ShellExecutorProvider
 import com.arslan.shizuwall.ui.MainActivity
 import com.arslan.shizuwall.utils.ShizukuPackageResolver
@@ -107,6 +108,8 @@ class FirewallControlReceiver : BroadcastReceiver() {
                     } catch (e: Exception) {
                         false
                     }
+                } else if (mode == "ROOT") {
+                    RootShellExecutor.hasRootAccess()
                 } else {
                     val binderAvailable = waitForShizukuBinder()
                     if (binderAvailable) {
@@ -124,7 +127,13 @@ class FirewallControlReceiver : BroadcastReceiver() {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
                             context,
-                            if (mode == "LADB") context.getString(R.string.daemon_not_running) else context.getString(R.string.shizuku_not_available),
+                            if (mode == "LADB") {
+                                context.getString(R.string.daemon_not_running)
+                            } else if (mode == "ROOT") {
+                                context.getString(R.string.root_not_found_message)
+                            } else {
+                                context.getString(R.string.shizuku_not_available)
+                            },
                             Toast.LENGTH_SHORT
                         ).show()
                     }

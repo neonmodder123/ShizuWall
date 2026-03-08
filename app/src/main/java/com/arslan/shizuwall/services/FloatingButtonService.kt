@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat
 import com.arslan.shizuwall.FirewallMode
 import com.arslan.shizuwall.R
 import com.arslan.shizuwall.shell.ShellExecutorBlocking
+import com.arslan.shizuwall.shell.RootShellExecutor
 import com.arslan.shizuwall.ui.MainActivity
 import com.arslan.shizuwall.utils.ShizukuPackageResolver
 import com.arslan.shizuwall.widgets.FirewallWidgetProvider
@@ -273,7 +274,14 @@ class FloatingButtonService : Service() {
 
     private fun checkBackendReady(): Boolean {
         val mode = sharedPreferences.getString(MainActivity.KEY_WORKING_MODE, "SHIZUKU") ?: "SHIZUKU"
-        return if (mode == "LADB") {
+        return if (mode == "ROOT") {
+            if (RootShellExecutor.hasRootAccess()) {
+                true
+            } else {
+                Toast.makeText(this, getString(R.string.root_not_found_message), Toast.LENGTH_SHORT).show()
+                false
+            }
+        } else if (mode == "LADB") {
             val dm = com.arslan.shizuwall.daemon.PersistentDaemonManager(this)
             if (dm.isDaemonRunning()) {
                 true
