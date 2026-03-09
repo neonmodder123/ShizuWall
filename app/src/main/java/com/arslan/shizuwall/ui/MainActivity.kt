@@ -1835,12 +1835,7 @@ class MainActivity : BaseActivity() {
         }
 
         val currentElapsed = SystemClock.elapsedRealtime()
-        // if currentElapsed < savedElapsed a reboot happened -> clear saved state
         if (currentElapsed < savedElapsed) {
-            sharedPreferences.edit()
-                .remove(KEY_FIREWALL_ENABLED)
-                .remove(KEY_FIREWALL_SAVED_ELAPSED)
-                .apply()
             return false
         }
 

@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.SystemClock
+import android.os.UserManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -54,7 +55,7 @@ class BootReceiver : BroadcastReceiver() {
 
     private suspend fun handleBootEvent(context: Context, action: String?) {
         val dpPrefs = getDeviceProtectedPrefs(context)
-        val normalPrefs = context.getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE)
+        val normalPrefs = getCredentialProtectedPrefsOrNull(context)
 
         val enabled = readBoolean(dpPrefs, normalPrefs, MainActivity.KEY_FIREWALL_ENABLED, false)
         val savedElapsed = readLong(dpPrefs, normalPrefs, MainActivity.KEY_FIREWALL_SAVED_ELAPSED, -1L)
@@ -129,46 +130,63 @@ class BootReceiver : BroadcastReceiver() {
         }
     }
 
+    private fun getCredentialProtectedPrefsOrNull(context: Context): SharedPreferences? {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val userManager = context.getSystemService(UserManager::class.java)
+            if (userManager != null && !userManager.isUserUnlocked) {
+                Log.d(TAG, "Credential-protected prefs unavailable until user unlock")
+                return null
+            }
+        }
+
+        return try {
+            context.getSharedPreferences(MainActivity.PREF_NAME, Context.MODE_PRIVATE)
+        } catch (e: IllegalStateException) {
+            Log.w(TAG, "Credential-protected prefs unavailable", e)
+            null
+        }
+    }
+
     private fun readBoolean(
         primary: SharedPreferences,
-        fallback: SharedPreferences,
+        fallback: SharedPreferences?,
         key: String,
         defaultValue: Boolean
     ): Boolean {
         return if (primary.contains(key)) primary.getBoolean(key, defaultValue)
-        else fallback.getBoolean(key, defaultValue)
+        else fallback?.getBoolean(key, defaultValue) ?: defaultValue
     }
 
     private fun readLong(
         primary: SharedPreferences,
-        fallback: SharedPreferences,
+        fallback: SharedPreferences?,
         key: String,
         defaultValue: Long
     ): Long {
         return if (primary.contains(key)) primary.getLong(key, defaultValue)
-        else fallback.getLong(key, defaultValue)
+        else fallback?.getLong(key, defaultValue) ?: defaultValue
     }
 
     private fun readString(
         primary: SharedPreferences,
-        fallback: SharedPreferences,
+        fallback: SharedPreferences?,
         key: String,
         defaultValue: String
     ): String {
         return if (primary.contains(key)) primary.getString(key, defaultValue) ?: defaultValue
-        else fallback.getString(key, defaultValue) ?: defaultValue
+        else fallback?.getString(key, defaultValue) ?: defaultValue
     }
 
     private fun loadActivePackages(
         context: Context,
         primary: SharedPreferences,
-        fallback: SharedPreferences,
+        fallback: SharedPreferences?,
         selfPackage: String
     ): List<String> {
         val active = if (primary.contains(MainActivity.KEY_ACTIVE_PACKAGES)) {
             primary.getStringSet(MainActivity.KEY_ACTIVE_PACKAGES, emptySet())
         } else {
-            fallback.getStringSet(MainActivity.KEY_ACTIVE_PACKAGES, emptySet())
+            fallback?.getStringSet(MainActivity.KEY_ACTIVE_PACKAGES, emptySet())
         } ?: emptySet()
 
         return active
@@ -209,7 +227,8 @@ class BootReceiver : BroadcastReceiver() {
         return true
     }
 
-    private fun updateFirewallStateAfterReapply(prefs: SharedPreferences, elapsed: Long) {
+    private fun updateFirewallStateAfterReapply(prefs: SharedPreferences?, elapsed: Long) {
+        prefs ?: return
         prefs.edit()
             .putBoolean(MainActivity.KEY_FIREWALL_ENABLED, true)
             .putLong(MainActivity.KEY_FIREWALL_SAVED_ELAPSED, elapsed)
@@ -217,7 +236,8 @@ class BootReceiver : BroadcastReceiver() {
             .apply()
     }
 
-    private fun clearFirewallState(prefs: SharedPreferences) {
+    private fun clearFirewallState(prefs: SharedPreferences?) {
+        prefs ?: return
         prefs.edit().apply {
             remove(MainActivity.KEY_FIREWALL_ENABLED)
             remove(MainActivity.KEY_FIREWALL_SAVED_ELAPSED)
