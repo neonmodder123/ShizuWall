@@ -28,6 +28,11 @@
   </a>
 </p>
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/image?repos=AhmetCanArslan/ShizuWall&type=date&legend=top-left)](https://www.star-history.com/?repos=AhmetCanArslan%2FShizuWall&type=date&legend=top-left)
+
+
 ## Why ShizuWall
 
 - **No root / no VPN**: avoids packet interception and persistent VPN tunnel side effects.
