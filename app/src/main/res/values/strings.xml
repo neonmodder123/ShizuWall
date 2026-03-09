@@ -117,6 +117,8 @@
     <string name="keep_failed_apps_selected_description">Don\'t unselect apps on failure</string>
     <string name="auto_enable_on_shizuku_start">Auto-enable firewall when Shizuku starts</string>
     <string name="auto_enable_on_shizuku_start_description">Automatically enable the firewall when the Shizuku service becomes available</string>
+    <string name="apply_root_rules_after_reboot">Apply firewall rules after reboot</string>
+    <string name="apply_root_rules_after_reboot_description">Re-apply the last active firewall rules after boot completes with root</string>
     <string name="working_mode_title">Working mode</string>
     <string name="working_mode_summary">Choose how Firewall commands are executed</string>
     <string name="working_mode_shizuku">Shizuku</string>
@@ -235,6 +237,7 @@
     <string name="already_in_list">%s already in list</string>
     <string name="error_format">Error: %s</string>
     <string name="firewall_reboot_message">Firewall should be enabled again after rebooting. Tap to open the app.</string>
+    <string name="firewall_reboot_apply_failed_message">Failed to re-apply firewall rules after reboot. Tap to open the app.</string>
     <string name="open_developer_settings">Open Developer Settings</string>
     <string name="ladb_connection_failed_help">Connection failed. Please check:\n1. Wireless debugging is enabled in Developer options\n2. The device is on the same network\n3. No firewall is blocking the connection</string>
     <string name="copy_logs_success">Logs copied to clipboard!</string>

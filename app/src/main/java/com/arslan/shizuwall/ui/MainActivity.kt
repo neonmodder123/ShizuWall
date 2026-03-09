@@ -92,6 +92,7 @@ class MainActivity : BaseActivity() {
         const val KEY_FIREWALL_MODE = "firewall_mode" 
         const val KEY_SMART_FOREGROUND_APP = "smart_foreground_app"  // Current foreground app in smart mode
         const val KEY_AUTO_ENABLE_ON_SHIZUKU_START = "auto_enable_on_shizuku_start"
+        const val KEY_APPLY_ROOT_RULES_AFTER_REBOOT = "apply_root_rules_after_reboot"
         const val KEY_SHOW_SETUP_PROMPT = "show_setup_prompt"
         const val KEY_WORKING_MODE = "working_mode"
         const val KEY_SORT_ORDER = "sort_order"

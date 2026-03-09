@@ -66,6 +66,8 @@ class SettingsActivity : BaseActivity() {
     private lateinit var switchUseDynamicColor: SwitchCompat
     private lateinit var switchAutoEnableOnShizukuStart: SwitchCompat
     private lateinit var cardAutoEnableOnShizukuStart: com.google.android.material.card.MaterialCardView
+    private lateinit var switchApplyRootRulesAfterReboot: SwitchCompat
+    private lateinit var cardApplyRootRulesAfterReboot: com.google.android.material.card.MaterialCardView
     private lateinit var switchAppMonitor: SwitchCompat
     private lateinit var switchFloatingButton: SwitchCompat
 
@@ -79,6 +81,7 @@ class SettingsActivity : BaseActivity() {
     private lateinit var layoutSetLadb: LinearLayout
     private lateinit var cardSkipConfirm: com.google.android.material.card.MaterialCardView
     private var autoEnablePreviousState: Boolean = false  // Store previous state before disabling
+    private var rootReapplyPreviousState: Boolean = false
     private var suppressWorkingModeListener = false
     
     // Firewall Mode Selector
@@ -210,6 +213,8 @@ class SettingsActivity : BaseActivity() {
         // Auto-enable switch (new)
         switchAutoEnableOnShizukuStart = findViewById(R.id.switchAutoEnableOnShizukuStart)
         cardAutoEnableOnShizukuStart = findViewById(R.id.cardAutoEnableOnShizukuStart)
+        switchApplyRootRulesAfterReboot = findViewById(R.id.switchApplyRootRulesAfterReboot)
+        cardApplyRootRulesAfterReboot = findViewById(R.id.cardApplyRootRulesAfterReboot)
         
         // Firewall Mode Selector
         radioGroupFirewallMode = findViewById(R.id.radioGroupFirewallMode)
@@ -256,6 +261,7 @@ class SettingsActivity : BaseActivity() {
         updateCurrentLanguageDisplay()
         switchUseDynamicColor.isChecked = prefs.getBoolean(MainActivity.KEY_USE_DYNAMIC_COLOR, true)
         switchAutoEnableOnShizukuStart.isChecked = prefs.getBoolean(MainActivity.KEY_AUTO_ENABLE_ON_SHIZUKU_START, false)
+        switchApplyRootRulesAfterReboot.isChecked = prefs.getBoolean(MainActivity.KEY_APPLY_ROOT_RULES_AFTER_REBOOT, false)
         switchAppMonitor.isChecked = prefs.getBoolean(MainActivity.KEY_APP_MONITOR_ENABLED, false)
         switchFloatingButton.isChecked = prefs.getBoolean(
             com.arslan.shizuwall.services.FloatingButtonService.KEY_FLOATING_BUTTON_ENABLED, false
@@ -472,6 +478,11 @@ class SettingsActivity : BaseActivity() {
             setResult(RESULT_OK)
         }
 
+        switchApplyRootRulesAfterReboot.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean(MainActivity.KEY_APPLY_ROOT_RULES_AFTER_REBOOT, isChecked).apply()
+            setResult(RESULT_OK)
+        }
+
         switchAppMonitor.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
@@ -570,6 +581,7 @@ class SettingsActivity : BaseActivity() {
         makeCardClickableForSwitch(switchSkipErrorDialog)
         makeCardClickableForSwitch(switchKeepErrorAppsSelected)
         makeCardClickableForSwitch(switchAutoEnableOnShizukuStart)
+        makeCardClickableForSwitch(switchApplyRootRulesAfterReboot)
         makeCardClickableForSwitch(switchAppMonitor)
         makeCardClickableForSwitch(switchFloatingButton)
     }
@@ -615,10 +627,13 @@ class SettingsActivity : BaseActivity() {
     private fun updateWorkingModeDependentUi(mode: WorkingMode, restoreAutoEnable: Boolean) {
         val isLadb = mode == WorkingMode.LADB
         val isShizuku = mode == WorkingMode.SHIZUKU
+        val isRoot = mode == WorkingMode.ROOT
 
         cardSetLadb.visibility = if (isLadb) View.VISIBLE else View.GONE
         cardAutoEnableOnShizukuStart.visibility = if (isShizuku) View.VISIBLE else View.GONE
         switchAutoEnableOnShizukuStart.isEnabled = isShizuku
+        cardApplyRootRulesAfterReboot.visibility = if (isRoot) View.VISIBLE else View.GONE
+        switchApplyRootRulesAfterReboot.isEnabled = isRoot
 
         if (!isShizuku) {
             autoEnablePreviousState = switchAutoEnableOnShizukuStart.isChecked
@@ -626,12 +641,20 @@ class SettingsActivity : BaseActivity() {
                 switchAutoEnableOnShizukuStart.isChecked = false
                 prefs.edit().putBoolean(MainActivity.KEY_AUTO_ENABLE_ON_SHIZUKU_START, false).apply()
             }
-            return
-        }
-
-        if (restoreAutoEnable && autoEnablePreviousState) {
+        } else if (restoreAutoEnable && autoEnablePreviousState) {
             switchAutoEnableOnShizukuStart.isChecked = true
             prefs.edit().putBoolean(MainActivity.KEY_AUTO_ENABLE_ON_SHIZUKU_START, true).apply()
+        }
+
+        if (!isRoot) {
+            rootReapplyPreviousState = switchApplyRootRulesAfterReboot.isChecked
+            if (switchApplyRootRulesAfterReboot.isChecked) {
+                switchApplyRootRulesAfterReboot.isChecked = false
+                prefs.edit().putBoolean(MainActivity.KEY_APPLY_ROOT_RULES_AFTER_REBOOT, false).apply()
+            }
+        } else if (restoreAutoEnable && rootReapplyPreviousState) {
+            switchApplyRootRulesAfterReboot.isChecked = true
+            prefs.edit().putBoolean(MainActivity.KEY_APPLY_ROOT_RULES_AFTER_REBOOT, true).apply()
         }
     }
 
@@ -867,6 +890,7 @@ class SettingsActivity : BaseActivity() {
                         MainActivity.KEY_KEEP_ERROR_APPS_SELECTED,
                         MainActivity.KEY_USE_DYNAMIC_COLOR,
                         MainActivity.KEY_AUTO_ENABLE_ON_SHIZUKU_START,
+                        MainActivity.KEY_APPLY_ROOT_RULES_AFTER_REBOOT,
                         MainActivity.KEY_APP_MONITOR_ENABLED,
                         MainActivity.KEY_SKIP_ANDROID11_INFO,
                         MainActivity.KEY_SELECTED_FONT,
@@ -955,6 +979,7 @@ class SettingsActivity : BaseActivity() {
                     MainActivity.KEY_KEEP_ERROR_APPS_SELECTED,
                     MainActivity.KEY_USE_DYNAMIC_COLOR,
                     MainActivity.KEY_AUTO_ENABLE_ON_SHIZUKU_START,
+                    MainActivity.KEY_APPLY_ROOT_RULES_AFTER_REBOOT,
                     MainActivity.KEY_APP_MONITOR_ENABLED,
                     MainActivity.KEY_SKIP_ANDROID11_INFO,
                     MainActivity.KEY_SELECTED_FONT,
