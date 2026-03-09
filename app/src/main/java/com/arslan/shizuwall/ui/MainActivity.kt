@@ -272,6 +272,7 @@ class MainActivity : BaseActivity() {
             showSystemApps = sharedPreferences.getBoolean(KEY_SHOW_SYSTEM_APPS, false)
             moveSelectedTop = sharedPreferences.getBoolean(KEY_MOVE_SELECTED_TOP, true)
             firewallMode = FirewallMode.fromName(sharedPreferences.getString(KEY_FIREWALL_MODE, FirewallMode.DEFAULT.name))
+            updateFirewallToggleThumbIcon()
             loadInstalledApps()
             updateCategoryChips()
             
@@ -415,6 +416,7 @@ class MainActivity : BaseActivity() {
         }
 
         setupFirewallToggle()
+        updateFirewallToggleThumbIcon()
         setupSearchView()
         setupSelectAllCheckbox()
         setupRecyclerView()
@@ -545,6 +547,7 @@ class MainActivity : BaseActivity() {
 
         // Update firewallMode from preferences
         firewallMode = FirewallMode.fromName(sharedPreferences.getString(KEY_FIREWALL_MODE, FirewallMode.DEFAULT.name))
+        updateFirewallToggleThumbIcon()
 
         // Reflect current firewall state in UI
         if (!isFirewallProcessRunning) {
@@ -1478,6 +1481,20 @@ class MainActivity : BaseActivity() {
                 applyFirewallState(false, activeFirewallPackages.toList())
             }
         }
+    }
+
+    private fun updateFirewallToggleThumbIcon() {
+        if (!::firewallToggle.isInitialized) return
+
+        val workingMode = WorkingMode.fromName(
+            sharedPreferences.getString(KEY_WORKING_MODE, WorkingMode.SHIZUKU.name)
+        )
+        val iconRes = when (workingMode) {
+            WorkingMode.SHIZUKU -> R.drawable.ic_shizuku
+            WorkingMode.LADB -> R.drawable.adb_24px
+            WorkingMode.ROOT -> R.drawable.hashtag_24px
+        }
+        firewallToggle.setThumbIconResource(iconRes)
     }
 
     private fun showFirewallConfirmDialog(selectedApps: List<AppInfo>) {
