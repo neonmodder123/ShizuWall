@@ -204,6 +204,7 @@ class ForegroundDetectionService : AccessibilityService() {
 
     private var currentForegroundPackage: String? = null
     private var lastManagedPackage: String? = null
+    private var isShizuWallFocused: Boolean? = null
 
     @Volatile private var pendingBlockPackage: String? = null
 
@@ -240,6 +241,7 @@ class ForegroundDetectionService : AccessibilityService() {
                     currentForegroundPackage = null
                     lastManagedPackage = null
                     pendingBlockPackage = null
+                    isShizuWallFocused = null
                     sharedPreferences.edit()
                         .putString(MainActivity.KEY_SMART_FOREGROUND_APP, "")
                         .putStringSet(MainActivity.KEY_ACTIVE_PACKAGES, emptySet())
@@ -275,6 +277,7 @@ class ForegroundDetectionService : AccessibilityService() {
                     currentForegroundPackage = null
                     lastManagedPackage = null
                     pendingBlockPackage = null
+                    isShizuWallFocused = null
                     sharedPreferences.edit()
                         .putString(MainActivity.KEY_SMART_FOREGROUND_APP, "")
                         .putStringSet(MainActivity.KEY_ACTIVE_PACKAGES, emptySet())
@@ -384,9 +387,6 @@ class ForegroundDetectionService : AccessibilityService() {
 
         val packageName = event.packageName?.toString() ?: return
 
-        // Skip self.
-        if (packageName == this.packageName) return
-
         // Skip same-package events immediately (no debounce needed).
         if (packageName == currentForegroundPackage) return
 
@@ -395,8 +395,16 @@ class ForegroundDetectionService : AccessibilityService() {
         if (className != null && isNonActivityWindow(className)) return
 
         // Gate on cached state — zero SharedPrefs reads on the hot path.
-        if (cachedFirewallMode != FirewallMode.SMART_FOREGROUND) return
+        if (cachedFirewallMode != FirewallMode.SMART_FOREGROUND && cachedFirewallMode != FirewallMode.FOCUS_TRACKER) {
+            if (packageName == this.packageName) return
+            return
+        }
         if (!cachedFirewallEnabled) return
+
+        if (cachedFirewallMode == FirewallMode.FOCUS_TRACKER) {
+            processFocusTracker(packageName)
+            return
+        }
 
         // Debounce: cancel any previously queued dispatch and re-schedule.
         debounceJob?.cancel()
@@ -405,6 +413,26 @@ class ForegroundDetectionService : AccessibilityService() {
         debounceJob = serviceScope.launch {
             delay(DEBOUNCE_MS)
             processPackageChange(newPackage)
+        }
+    }
+
+    private fun processFocusTracker(newPackage: String) {
+        // Ignore system UI overlays so pulling down notifications doesn't block internet
+        if (newPackage == "com.android.systemui") return
+
+        val isNowFocused = (newPackage == this.packageName)
+        if (isShizuWallFocused == isNowFocused) return
+        
+        isShizuWallFocused = isNowFocused
+        
+        serviceScope.launch(Dispatchers.IO) {
+            try {
+                val executor = getShellExecutor()
+                ensureChain3Enabled(executor)
+                applyFocusTrackerRules(executor, isNowFocused)
+            } catch (e: Exception) {
+                Log.e(TAG, "Focus Tracker rule update failed", e)
+            }
         }
     }
 
@@ -603,6 +631,37 @@ class ForegroundDetectionService : AccessibilityService() {
             } catch (e: Exception) {
                 Log.w(TAG, "Failed unmanaged allow for $packageName", e)
             }
+        }
+    }
+
+    private suspend fun applyFocusTrackerRules(executor: ShellExecutor, isFocused: Boolean) {
+        val pkgs = selectedPackages.toList()
+        // If focused, internet working (unblocks all that is selected)
+        // If unfocused, internet blocked (blocks all that is selected)
+        val shouldEnableNetworking = isFocused
+        
+        for (pkg in pkgs) {
+            executor.exec("cmd connectivity set-package-networking-enabled $shouldEnableNetworking $pkg")
+        }
+
+        // Update active packages so UI and manual disable logic stays in sync
+        // If focused, no packages are being blocked.
+        val activePkgs = if (isFocused) emptySet() else selectedPackages
+        sharedPreferences.edit()
+            .putStringSet(MainActivity.KEY_ACTIVE_PACKAGES, activePkgs)
+            .apply()
+        
+        withContext(Dispatchers.Main) {
+            val nm = getSystemService(NotificationManager::class.java)
+            val title = if (isFocused) getString(R.string.focus_tracker_paused) else getString(R.string.focus_tracker_active)
+            val notification = NotificationCompat.Builder(this@ForegroundDetectionService, CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(getString(R.string.firewall_mode_focus_tracker_description))
+                .setSmallIcon(R.drawable.ic_notification)
+                .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .build()
+            nm.notify(NOTIFICATION_ID, notification)
         }
     }
 
