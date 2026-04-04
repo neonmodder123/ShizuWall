@@ -416,7 +416,7 @@ class ForegroundDetectionService : AccessibilityService() {
         }
     }
 
-    private fun processFocusTracker(newPackage: String) {
+    /*private fun processFocusTracker(newPackage: String) {
         // Ignore system UI overlays so pulling down notifications doesn't block internet
         if (newPackage == "com.android.systemui") return
 
@@ -430,6 +430,27 @@ class ForegroundDetectionService : AccessibilityService() {
                 val executor = getShellExecutor()
                 ensureChain3Enabled(executor)
                 applyFocusTrackerRules(executor, isNowFocused)
+            } catch (e: Exception) {
+                Log.e(TAG, "Focus Tracker rule update failed", e)
+            }
+        }
+    }*/
+
+    private fun processFocusTracker(newPackage: String) {
+        // Remove the system ui overlay ignorance feature
+        val isNowFocused = (newPackage == this.packageName)
+        
+        // Only execute when focus changes
+        if (isShizuWallFocused == isNowFocused) return
+    
+        isShizuWallFocused = isNowFocused
+    
+        serviceScope.launch(Dispatchers.IO) {
+            try {
+                val executor = getShellExecutor()
+                ensureChain3Enabled(executor)
+                applyFocusTrackerRules(executor, isNowFocused)
+                Log.d(TAG, "ShizuWall Focused: $isNowFocused")
             } catch (e: Exception) {
                 Log.e(TAG, "Focus Tracker rule update failed", e)
             }
