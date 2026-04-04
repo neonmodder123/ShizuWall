@@ -416,26 +416,6 @@ class ForegroundDetectionService : AccessibilityService() {
         }
     }
 
-    /*private fun processFocusTracker(newPackage: String) {
-        // Ignore system UI overlays so pulling down notifications doesn't block internet
-        if (newPackage == "com.android.systemui") return
-
-        val isNowFocused = (newPackage == this.packageName)
-        if (isShizuWallFocused == isNowFocused) return
-        
-        isShizuWallFocused = isNowFocused
-        
-        serviceScope.launch(Dispatchers.IO) {
-            try {
-                val executor = getShellExecutor()
-                ensureChain3Enabled(executor)
-                applyFocusTrackerRules(executor, isNowFocused)
-            } catch (e: Exception) {
-                Log.e(TAG, "Focus Tracker rule update failed", e)
-            }
-        }
-    }*/
-
     private fun processFocusTracker(newPackage: String) {
         // Remove the system ui overlay ignorance feature
         val isNowFocused = (newPackage == this.packageName)
@@ -657,11 +637,17 @@ class ForegroundDetectionService : AccessibilityService() {
 
     private suspend fun applyFocusTrackerRules(executor: ShellExecutor, isFocused: Boolean) {
         val pkgs = selectedPackages.toList()
+    
         // If focused, internet working (unblocks all that is selected)
         // If unfocused, internet blocked (blocks all that is selected)
         val shouldEnableNetworking = isFocused
-        
+    
         for (pkg in pkgs) {
+            // don't block ShizuWall itself or Shizuku's internet for it to function correctly
+            if (pkg == this.packageName || pkg.contains("shizuku")) {
+                continue 
+            }
+        
             executor.exec("cmd connectivity set-package-networking-enabled $shouldEnableNetworking $pkg")
         }
 
@@ -671,10 +657,14 @@ class ForegroundDetectionService : AccessibilityService() {
         sharedPreferences.edit()
             .putStringSet(MainActivity.KEY_ACTIVE_PACKAGES, activePkgs)
             .apply()
-        
+
         withContext(Dispatchers.Main) {
             val nm = getSystemService(NotificationManager::class.java)
-            val title = if (isFocused) getString(R.string.focus_tracker_paused) else getString(R.string.focus_tracker_active)
+            val title = if (isFocused) {
+                getString(R.string.focus_tracker_paused) 
+            } else {
+                getString(R.string.focus_tracker_active)
+            }
             val notification = NotificationCompat.Builder(this@ForegroundDetectionService, CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(getString(R.string.firewall_mode_focus_tracker_description))
@@ -682,6 +672,7 @@ class ForegroundDetectionService : AccessibilityService() {
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .build()
+            
             nm.notify(NOTIFICATION_ID, notification)
         }
     }
