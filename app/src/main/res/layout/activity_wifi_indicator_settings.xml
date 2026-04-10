@@ -55,11 +55,14 @@
                     android:text="0"
                     android:textColor="?android:attr/textColorSecondary" />
 
-                <NumberPicker
-                    android:id="@+id/pickerIndicatorX"
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/sliderIndicatorX"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="8dp"
+                    android:valueFrom="0"
+                    android:valueTo="2000"
+                    android:stepSize="1" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -91,11 +94,14 @@
                     android:text="0"
                     android:textColor="?android:attr/textColorSecondary" />
 
-                <NumberPicker
-                    android:id="@+id/pickerIndicatorY"
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/sliderIndicatorY"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="8dp"
+                    android:valueFrom="0"
+                    android:valueTo="3000"
+                    android:stepSize="1" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -126,11 +132,14 @@
                     android:text="0"
                     android:textColor="?android:attr/textColorSecondary" />
 
-                <NumberPicker
-                    android:id="@+id/pickerIndicatorSize"
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/sliderIndicatorSize"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="8dp"
+                    android:valueFrom="24"
+                    android:valueTo="180"
+                    android:stepSize="1" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>

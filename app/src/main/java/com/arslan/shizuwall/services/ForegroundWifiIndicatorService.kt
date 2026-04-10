@@ -12,6 +12,7 @@ import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.PixelFormat
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
@@ -21,7 +22,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.arslan.shizuwall.R
@@ -50,7 +50,7 @@ class ForegroundWifiIndicatorService : Service() {
     private lateinit var prefs: SharedPreferences
     private var windowManager: WindowManager? = null
     private var floatingView: View? = null
-    private var indicatorIcon: ImageView? = null
+    private var indicatorDot: View? = null
     private var currentForegroundPackage: String? = null
 
     private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -155,7 +155,7 @@ class ForegroundWifiIndicatorService : Service() {
     private fun showOverlay() {
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         floatingView = LayoutInflater.from(this).inflate(R.layout.overlay_wifi_indicator, null)
-        indicatorIcon = floatingView?.findViewById(R.id.wifiIndicatorIcon)
+        indicatorDot = floatingView?.findViewById(R.id.wifiIndicatorDot)
 
         val params = createLayoutParams()
         val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
@@ -248,14 +248,14 @@ class ForegroundWifiIndicatorService : Service() {
         } catch (_: Exception) {
         }
         floatingView = null
-        indicatorIcon = null
+        indicatorDot = null
     }
 
     private fun updateIndicatorState() {
-        val icon = indicatorIcon ?: return
+        val dot = indicatorDot ?: return
 
         if (!ForegroundDetectionService.isServiceEnabled(this)) {
-            icon.imageTintList = ColorStateList.valueOf(0xFF9E9E9E.toInt())
+            tintDot(dot, 0xFF9E9E9E.toInt())
             return
         }
 
@@ -263,23 +263,29 @@ class ForegroundWifiIndicatorService : Service() {
             ?: prefs.getString(MainActivity.KEY_LAST_FOREGROUND_APP, null)
 
         if (foregroundPkg.isNullOrBlank()) {
-            icon.imageTintList = ColorStateList.valueOf(0xFF9E9E9E.toInt())
+            tintDot(dot, 0xFF9E9E9E.toInt())
             return
         }
 
         val firewallEnabled = prefs.getBoolean(MainActivity.KEY_FIREWALL_ENABLED, false)
         if (!firewallEnabled) {
-            icon.imageTintList = ColorStateList.valueOf(0xFFF44336.toInt())
+            tintDot(dot, 0xFFF44336.toInt())
             return
         }
 
         val activeBlocked = prefs.getStringSet(MainActivity.KEY_ACTIVE_PACKAGES, emptySet()) ?: emptySet()
         val isBlocked = activeBlocked.contains(foregroundPkg)
 
-        icon.imageTintList = if (isBlocked) {
-            ColorStateList.valueOf(0xFF4CAF50.toInt())
+        if (isBlocked) {
+            tintDot(dot, 0xFF4CAF50.toInt())
         } else {
-            ColorStateList.valueOf(0xFFF44336.toInt())
+            tintDot(dot, 0xFFF44336.toInt())
         }
+    }
+
+    private fun tintDot(dot: View, color: Int) {
+        val bg: Drawable = dot.background ?: return
+        bg.mutate().setTint(color)
+        dot.backgroundTintList = ColorStateList.valueOf(color)
     }
 }

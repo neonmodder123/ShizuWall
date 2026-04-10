@@ -3,20 +3,20 @@ package com.arslan.shizuwall.ui
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.widget.NumberPicker
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.slider.Slider
 import com.arslan.shizuwall.R
 
 class WifiIndicatorSettingsActivity : BaseActivity() {
 
     private lateinit var prefs: SharedPreferences
-    private lateinit var pickerX: NumberPicker
-    private lateinit var pickerY: NumberPicker
-    private lateinit var pickerSize: NumberPicker
+    private lateinit var sliderX: Slider
+    private lateinit var sliderY: Slider
+    private lateinit var sliderSize: Slider
     private lateinit var valueX: TextView
     private lateinit var valueY: TextView
     private lateinit var valueSize: TextView
@@ -40,44 +40,44 @@ class WifiIndicatorSettingsActivity : BaseActivity() {
             insets
         }
 
-        pickerX = findViewById(R.id.pickerIndicatorX)
-        pickerY = findViewById(R.id.pickerIndicatorY)
-        pickerSize = findViewById(R.id.pickerIndicatorSize)
+        sliderX = findViewById(R.id.sliderIndicatorX)
+        sliderY = findViewById(R.id.sliderIndicatorY)
+        sliderSize = findViewById(R.id.sliderIndicatorSize)
         valueX = findViewById(R.id.tvIndicatorXValue)
         valueY = findViewById(R.id.tvIndicatorYValue)
         valueSize = findViewById(R.id.tvIndicatorSizeValue)
 
-        setupPicker(pickerX, 0, 2000, prefs.getInt(MainActivity.KEY_WIFI_INDICATOR_X, 24)) { value ->
+        setupSlider(sliderX, 0, 2000, prefs.getInt(MainActivity.KEY_WIFI_INDICATOR_X, 24)) { value ->
             prefs.edit().putInt(MainActivity.KEY_WIFI_INDICATOR_X, value).apply()
             valueX.text = value.toString()
         }
-        setupPicker(pickerY, 0, 3000, prefs.getInt(MainActivity.KEY_WIFI_INDICATOR_Y, 120)) { value ->
+        setupSlider(sliderY, 0, 3000, prefs.getInt(MainActivity.KEY_WIFI_INDICATOR_Y, 120)) { value ->
             prefs.edit().putInt(MainActivity.KEY_WIFI_INDICATOR_Y, value).apply()
             valueY.text = value.toString()
         }
-        setupPicker(pickerSize, 24, 180, prefs.getInt(MainActivity.KEY_WIFI_INDICATOR_SIZE, 42)) { value ->
+        setupSlider(sliderSize, 24, 180, prefs.getInt(MainActivity.KEY_WIFI_INDICATOR_SIZE, 42)) { value ->
             prefs.edit().putInt(MainActivity.KEY_WIFI_INDICATOR_SIZE, value).apply()
             valueSize.text = value.toString()
         }
 
-        valueX.text = pickerX.value.toString()
-        valueY.text = pickerY.value.toString()
-        valueSize.text = pickerSize.value.toString()
+        valueX.text = sliderX.value.toInt().toString()
+        valueY.text = sliderY.value.toInt().toString()
+        valueSize.text = sliderSize.value.toInt().toString()
     }
 
-    private fun setupPicker(
-        picker: NumberPicker,
+    private fun setupSlider(
+        slider: Slider,
         min: Int,
         max: Int,
         initial: Int,
         onValueChanged: (Int) -> Unit
     ) {
-        picker.minValue = min
-        picker.maxValue = max
-        picker.wrapSelectorWheel = false
-        picker.value = initial.coerceIn(min, max)
-        picker.setOnValueChangedListener { _, _, newVal ->
-            onValueChanged(newVal)
+        slider.valueFrom = min.toFloat()
+        slider.valueTo = max.toFloat()
+        slider.stepSize = 1f
+        slider.value = initial.coerceIn(min, max).toFloat()
+        slider.addOnChangeListener { _, value, _ ->
+            onValueChanged(value.toInt())
         }
     }
 }
