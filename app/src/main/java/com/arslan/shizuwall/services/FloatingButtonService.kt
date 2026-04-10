@@ -401,7 +401,7 @@ class FloatingButtonService : Service() {
     }
 
     private fun disableFirewall(packageNames: List<String>): Boolean {
-        var all = true
+        var chainDisabled = false
         val selfPkg = packageName
         val toUnblock = packageNames.toMutableList()
 
@@ -418,9 +418,10 @@ class FloatingButtonService : Service() {
 
         for (pkg in toUnblock) {
             if (pkg == selfPkg || ShizukuPackageResolver.isShizukuPackage(this, pkg)) continue
-            if (!ShellExecutorBlocking.runBlockingSuccess(this, "cmd connectivity set-package-networking-enabled true $pkg")) all = false
+            // Ignore per-package unblock failures here; global chain disable is the source of truth.
+            ShellExecutorBlocking.runBlockingSuccess(this, "cmd connectivity set-package-networking-enabled true $pkg")
         }
-        if (!ShellExecutorBlocking.runBlockingSuccess(this, "cmd connectivity set-chain3-enabled false")) all = false
+        chainDisabled = ShellExecutorBlocking.runBlockingSuccess(this, "cmd connectivity set-chain3-enabled false")
 
         if (firewallMode == FirewallMode.SMART_FOREGROUND) {
             sharedPreferences.edit()
@@ -429,7 +430,7 @@ class FloatingButtonService : Service() {
                 .apply()
         }
 
-        return all
+        return chainDisabled
     }
 
     private fun saveFirewallEnabled(enabled: Boolean) {

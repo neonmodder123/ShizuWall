@@ -59,7 +59,7 @@ class ForegroundFirewallIndicatorService : Service() {
 
     private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         if (key == MainActivity.KEY_FIREWALL_ENABLED ||
-            key == MainActivity.KEY_SELECTED_APPS ||
+            key == MainActivity.KEY_ACTIVE_PACKAGES ||
             key == MainActivity.KEY_FIREWALL_INDICATOR_X ||
             key == MainActivity.KEY_FIREWALL_INDICATOR_Y ||
             key == MainActivity.KEY_FIREWALL_INDICATOR_SIZE ||
@@ -295,8 +295,8 @@ class ForegroundFirewallIndicatorService : Service() {
             return
         }
 
-        val selectedApps = prefs.getStringSet(MainActivity.KEY_SELECTED_APPS, emptySet()) ?: emptySet()
-        val isFirewalled = selectedApps.contains(foregroundPkg)
+        val activePackages = prefs.getStringSet(MainActivity.KEY_ACTIVE_PACKAGES, emptySet()) ?: emptySet()
+        val isFirewalled = activePackages.contains(foregroundPkg)
 
         if (isFirewalled) {
             tintDot(dot, 0xFFF44336.toInt()) // Red when it's a firewalled (selected) app
