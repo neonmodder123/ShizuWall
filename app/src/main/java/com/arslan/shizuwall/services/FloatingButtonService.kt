@@ -146,9 +146,36 @@ class FloatingButtonService : Service() {
         var initialTouchY = 0f
         var moved = false
 
+        var inactivityJob: Job? = null
+        val inactivityTimeout = 3000L
+
+        fun resetInactivityTimer() {
+            inactivityJob?.cancel()
+            floatingView?.background?.alpha = 255
+            fabIcon?.animate()?.cancel()
+            fabIcon?.alpha = 1.0f
+            inactivityJob = scope.launch {
+                delay(inactivityTimeout)
+                val animator = android.animation.ValueAnimator.ofInt(255, 0)
+                animator.duration = 300
+                animator.addUpdateListener { animation ->
+                    floatingView?.background?.alpha = animation.animatedValue as Int
+                }
+                animator.start()
+                fabIcon?.animate()?.alpha(0.3f)?.setDuration(300)?.start()
+            }
+        }
+
+        resetInactivityTimer()
+
         floatingView?.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    inactivityJob?.cancel()
+                    v.background?.alpha = 255
+                    fabIcon?.animate()?.cancel()
+                    fabIcon?.alpha = 1.0f
+                    
                     initialX = params.x
                     initialY = params.y
                     initialTouchX = event.rawX
@@ -176,6 +203,7 @@ class FloatingButtonService : Service() {
                     if (!moved && event.action == MotionEvent.ACTION_UP) {
                         onFabClicked()
                     }
+                    resetInactivityTimer()
                     true
                 }
                 else -> false
