@@ -545,7 +545,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="Hybrid Mode"
+                            android:text="@string/firewall_mode_hybrid"
                             android:textSize="15sp"
                             android:textColor="?android:attr/textColorPrimary" />
 
@@ -554,7 +554,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="32dp"
-                            android:text="Configure mode individually per app"
+                            android:text="@string/firewall_mode_hybrid_description"
                             android:textSize="12sp"
                             android:textColor="?android:attr/textColorSecondary" />
 
