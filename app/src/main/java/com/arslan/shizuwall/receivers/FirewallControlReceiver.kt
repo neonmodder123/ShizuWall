@@ -295,8 +295,8 @@ class FirewallControlReceiver : BroadcastReceiver() {
                             currentActive.removeAll(successful)
                             putStringSet(MainActivity.KEY_ACTIVE_PACKAGES, currentActive)
 
-                            // For Screen Lock Mode, selected apps stay intact across unlock events.
-                            if (firewallMode != FirewallMode.SCREEN_LOCK_MODE) {
+                            // For Screen Lock Mode and Hybrid Mode, selected apps stay intact across unlock events.
+                            if (firewallMode != FirewallMode.SCREEN_LOCK_MODE && firewallMode != FirewallMode.HYBRID) {
                                 val currentSelected = prefs.getStringSet(MainActivity.KEY_SELECTED_APPS, emptySet())?.toMutableSet() ?: mutableSetOf()
                                 currentSelected.removeAll(successful)
                                 putStringSet(MainActivity.KEY_SELECTED_APPS, currentSelected)
