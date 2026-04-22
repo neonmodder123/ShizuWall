@@ -45,5 +45,5 @@ enum class FirewallMode {
      * Check if this mode allows dynamic app selection while firewall is enabled
      */
     fun allowsDynamicSelection(): Boolean =
-        this == ADAPTIVE || this == SCREEN_LOCK_MODE || this == SMART_FOREGROUND || this == WHITELIST || this == HYBRID this == FOCUS_TRACKER
+        this == ADAPTIVE || this == SCREEN_LOCK_MODE || this == SMART_FOREGROUND || this == WHITELIST || this == HYBRID || this == FOCUS_TRACKER
 }
