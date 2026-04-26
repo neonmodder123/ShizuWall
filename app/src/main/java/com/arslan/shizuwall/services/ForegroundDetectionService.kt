@@ -58,8 +58,6 @@ class ForegroundDetectionService : AccessibilityService() {
         private const val RETRY_DELAY_MS = 300L
         private const val UNMANAGED_ALLOW_THROTTLE_MS = 2000L
 
-        private var isShizuWallFocused: Boolean? = null
-
         // System packages that should never be managed by Smart Foreground
         private val SYSTEM_PACKAGES = setOf(
             "com.android.systemui",
@@ -273,7 +271,7 @@ class ForegroundDetectionService : AccessibilityService() {
                 val modeName = prefs.getString(MainActivity.KEY_FIREWALL_MODE, FirewallMode.DEFAULT.name)
                 cachedFirewallMode = FirewallMode.fromName(modeName)
 
-                if (cachedFirewallMode != FirewallMode.SMART_FOREGROUND && cachedFirewallMode != FirewallMode.HYBRID && cachedFirewallMode != FirewallMode.FOCUS_TRACKER) {) {
+                if (cachedFirewallMode != FirewallMode.SMART_FOREGROUND && cachedFirewallMode != FirewallMode.HYBRID && cachedFirewallMode != FirewallMode.FOCUS_TRACKER) {
                     try {
                         stopForeground(true)
                     } catch (e: Exception) {
@@ -287,7 +285,7 @@ class ForegroundDetectionService : AccessibilityService() {
                         .putString(MainActivity.KEY_SMART_FOREGROUND_APP, "")
                         .putStringSet(MainActivity.KEY_ACTIVE_PACKAGES, emptySet())
                         .apply()
-                } else if (cachedFirewallEnabled) {
+                } else if (cachedFirewallEnabled && (cachedFirewallMode == FirewallMode.SMART_FOREGROUND || cachedFirewallMode == FirewallMode.HYBRID || cachedFirewallMode == FirewallMode.FOCUS_TRACKER)) {
                     try {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                             startForeground(
@@ -374,7 +372,7 @@ class ForegroundDetectionService : AccessibilityService() {
 
         createNotificationChannel()
 
-        if (cachedFirewallEnabled && (cachedFirewallMode == FirewallMode.SMART_FOREGROUND || cachedFirewallMode == FirewallMode.HYBRID)) {
+        if (cachedFirewallEnabled && (cachedFirewallMode == FirewallMode.SMART_FOREGROUND || cachedFirewallMode == FirewallMode.HYBRID || cachedFirewallMode == FirewallMode.FOCUS_TRACKER)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 startForeground(NOTIFICATION_ID, buildNotification(null), ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
             } else {
@@ -440,6 +438,7 @@ class ForegroundDetectionService : AccessibilityService() {
 
     private fun processFocusTracker(newPackage: String) {
         // Remove the system ui overlay ignorance feature
+        currentForegroundPackage = newPackage
         val isNowFocused = (newPackage == this.packageName)
         
         // Only execute when focus changes
@@ -676,26 +675,26 @@ class ForegroundDetectionService : AccessibilityService() {
     // Version 1
     private suspend fun applyFocusTrackerRules(executor: ShellExecutor, isFocused: Boolean) {
         val pkgs = selectedPackages.toList()
-        val shouldEnable = isFocused
+        val shouldEnableNetworking = !isFocused
 
         // Run commands in parallel for faster execution
         coroutineScope {
             pkgs.forEach { pkg ->
-                if (pkg == packageName || pkg.contains("shizuku")) return@forEach
+                if (pkg == packageName || pkg.contains("shizuku", ignoreCase = true)) return@forEach
 
                 launch(Dispatchers.IO) {
-                    executor.exec("cmd connectivity set-package-networking-enabled $shouldEnable $pkg")
+                    executor.exec("cmd connectivity set-package-networking-enabled $shouldEnableNetworking $pkg")
                 }
             }
         }
 
-        val activePkgs = if (isFocused) emptySet() else selectedPackages
+        val activePkgs = if (isFocused) selectedPackages else emptySet()
         sharedPreferences.edit()
             .putStringSet(MainActivity.KEY_ACTIVE_PACKAGES, activePkgs)
             .apply()
 
         withContext(Dispatchers.Main) {
-            val title = if (isFocused) getString(R.string.focus_tracker_paused) else getString(R.string.focus_tracker_active)
+            val title = if (isFocused) getString(R.string.focus_tracker_active) else getString(R.string.focus_tracker_paused)
             val notification = NotificationCompat.Builder(this@ForegroundDetectionService, CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(getString(R.string.firewall_mode_focus_tracker_description))
