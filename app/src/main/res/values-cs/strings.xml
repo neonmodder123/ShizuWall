@@ -314,7 +314,7 @@
     <string name="firewall_mode_smart_foreground_description">Povolí pouze aplikaci, která je aktuálně v popředí</string>
     
     <string name="firewall_mode_focus_tracker">Focus Tracker</string>
-    <string name="firewall_mode_focus_tracker_description">Zakázat firewall, když je ShizuWall nezaostřený, a povolit, když je zaostřený.</string>
+    <string name="firewall_mode_focus_tracker_description">Zapnout bránu firewall, když není ShizuWall aktivní, a vypnout ji, když je aktivní.</string>
     
     <string name="smart_foreground_requires_accessibility">Vyžaduje oprávnění přístupnosti</string>
     <string name="firewall_mode_change_disabled">Nelze změnit režim brány firewall, když je brána firewall aktivní. Nejprve ji deaktivujte.</string>

@@ -293,7 +293,7 @@
     <string name="firewall_mode_smart_foreground_description">Yalnızca şu anda ön plandaki uygulamaya izin ver</string>
     
     <string name="firewall_mode_focus_tracker">Odak Takipçisi</string>
-    <string name="firewall_mode_focus_tracker_description">ShizuWall\'un odak dışı olduğu durumlarda güvenlik duvarını devre dışı bırak, odaklandığında ise etkinleştir.</string>
+    <string name="firewall_mode_focus_tracker_description">ShizuWall odak dışı olduğunda güvenlik duvarını etkinleştir, odaklandığında ise devre dışı bırak.</string>
     
     <string name="smart_foreground_requires_accessibility">Erişilebilirlik izni gereklidir</string>
     <string name="smart_foreground_service_description">Güvenlik duvarı kurallarını yönetmek için ön plan uygulamasını izler</string>

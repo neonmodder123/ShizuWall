@@ -295,7 +295,7 @@
     <string name="firewall_mode_smart_foreground_description">Разрешить только приложение на переднем плане</string>
 
     <string name="firewall_mode_focus_tracker">Отслеживание фокуса</string>
-    <string name="firewall_mode_focus_tracker_description">Отключать брандмауэр, когда ShizuWall не находится в фокусе, и включать, когда он находится в фокусе.</string>
+    <string name="firewall_mode_focus_tracker_description">Включать брандмауэр, когда ShizuWall не находится в фокусе, и отключать, когда он находится в фокусе.</string>
     
     <string name="smart_foreground_requires_accessibility">Требуется разрешение на специальные возможности</string>
     <string name="smart_foreground_service_description">Отслеживает приложение на переднем плане для управления правилами брандмауэра</string>

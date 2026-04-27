@@ -293,7 +293,7 @@
     <string name="firewall_mode_smart_foreground_description">Permitir apenas o app em primeiro plano</string>
     
     <string name="firewall_mode_focus_tracker">Rastreador de Foco</string>
-    <string name="firewall_mode_focus_tracker_description">Desativar o firewall quando o ShizuWall não estiver em foco e ativá-lo quando estiver em foco.</string>
+    <string name="firewall_mode_focus_tracker_description">Ativar a firewall quando o ShizuWall não estiver em foco e desativá-la quando estiver em foco.</string>
     
     <string name="smart_foreground_requires_accessibility">Requer permissão de Acessibilidade</string>
     <string name="smart_foreground_service_description">Monitora o app em primeiro plano para gerenciar regras do firewall</string>

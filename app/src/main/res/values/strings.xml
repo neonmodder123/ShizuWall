@@ -320,7 +320,7 @@
     <string name="firewall_mode_smart_foreground_description">Only allow the app currently in foreground</string>
     
     <string name="firewall_mode_focus_tracker">Focus Tracker</string>
-    <string name="firewall_mode_focus_tracker_description">Disable firewall when ShizuWall is unfocused, and enable when focused.</string>
+    <string name="firewall_mode_focus_tracker_description">Enable firewall when ShizuWall is unfocused, and disable when focused.</string>
     
     <string name="smart_foreground_requires_accessibility">Requires Accessibility permission</string>
     <string name="firewall_mode_change_disabled">Cannot change firewall mode while firewall is enabled. Please disable the firewall first.</string>

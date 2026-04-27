@@ -293,7 +293,7 @@
     <string name="firewall_mode_smart_foreground_description">Nur die aktuell im Vordergrund laufende App zulassen</string>
     
     <string name="firewall_mode_focus_tracker">Fokus-Tracker</string>
-    <string name="firewall_mode_focus_tracker_description">Deaktiviere die Firewall, wenn ShizuWall nicht im Vordergrund ist, und aktiviere sie, wenn es im Vordergrund ist.</string>
+    <string name="firewall_mode_focus_tracker_description">Die Firewall aktivieren, wenn ShizuWall nicht im Vordergrund ist, und deaktivieren, wenn es im Vordergrund ist.</string>
     
     <string name="smart_foreground_requires_accessibility">Erfordert Barrierefreiheits-Berechtigung</string>
     <string name="smart_foreground_service_description">Überwacht die Vordergrund-App zur Verwaltung der Firewall-Regeln</string>

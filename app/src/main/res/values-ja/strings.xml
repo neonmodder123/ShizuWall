@@ -295,7 +295,7 @@
     <string name="firewall_mode_smart_foreground_description">現在フォアグラウンドにあるアプリのみ許可</string>
     
     <string name="firewall_mode_focus_tracker">フォーカス・トラッカー</string>
-    <string name="firewall_mode_focus_tracker_description">ShizuWallがアクティブでないときはファイアウォールを無効にし、アクティブになったときは有効にする。</string>
+    <string name="firewall_mode_focus_tracker_description">ShizuWallがアクティブでないときはファイアウォールを有効にし、アクティブなときは無効にする。</string>
     
     <string name="smart_foreground_requires_accessibility">ユーザー補助の権限が必要です</string>
     <string name="smart_foreground_service_description">ファイアウォールルールを管理するためにフォアグラウンドアプリを監視します</string>
