@@ -383,5 +383,4 @@
 
     <string name="accessibility_auto_enable_title">Granting Permissions</string>
     <string name="accessibility_auto_enable_message">Attempting to auto-grant Accessibility via Shizuku/Root...</string>
-    <string name="accessibility_manual_enable_needed">Auto-grant failed. Please enable ShizuWall in Accessibility settings manually.</string>
 </resources>
