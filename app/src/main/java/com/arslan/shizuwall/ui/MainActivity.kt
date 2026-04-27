@@ -581,10 +581,12 @@ class MainActivity : BaseActivity() {
         loadInstalledApps()
         
         // If firewall is ON and mode requires accessibility, ensure it's enabled
+        val isIndicatorEnabled = sharedPreferences.getBoolean("firewall_indicator_enabled", false)
+
         if (isFirewallEnabled && (firewallMode == FirewallMode.SMART_FOREGROUND || 
             firewallMode == FirewallMode.HYBRID || 
             firewallMode == FirewallMode.FOCUS_TRACKER || 
-            sharedPreferences.getBoolean(MainActivity.KEY_FIREWALL_INDICATOR_ENABLED, false))) {
+            isIndicatorEnabled)) {
             
             if (!ForegroundDetectionService.isServiceEnabled(this)) {
                 lifecycleScope.launch {
@@ -599,8 +601,7 @@ class MainActivity : BaseActivity() {
                    firewallMode == FirewallMode.FOCUS_TRACKER)) {
             
             // Only disable if the indicator doesn't need it either
-            val indicatorActive = sharedPreferences.getBoolean(MainActivity.KEY_FIREWALL_INDICATOR_ENABLED, false)
-            if (ForegroundDetectionService.isServiceEnabled(this) && !indicatorActive) {
+            if (ForegroundDetectionService.isServiceEnabled(this) && !isIndicatorEnabled) {
                 lifecycleScope.launch {
                     ForegroundDetectionService.disableServiceViaShell(this@MainActivity)
                 }
